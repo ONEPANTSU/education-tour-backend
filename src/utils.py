@@ -15,7 +15,7 @@ def return_json(
 
 
 logger.add(
-    "../education_tour.log",
+    "education_tour.log",
     format="{time}\t|\t{level}\t|\t{message}",
     level="INFO",
     rotation="10MB",
