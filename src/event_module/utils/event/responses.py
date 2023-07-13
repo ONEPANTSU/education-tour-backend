@@ -1,60 +1,19 @@
-from typing import List, Optional
-
 from loguru import logger
-from sqlalchemy import delete, insert, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.event.models import Event
-from src.event.schemas import EventCreate, EventRead, EventUpdate
-from src.event.text.details import DETAILS
-from src.event.text.messages import MESSAGE
+from src.event_module.schemas import EventCreate, EventUpdate
+from src.event_module.utils.event.queries import (
+    create_event_query,
+    delete_event_query,
+    get_all_events_query,
+    get_event_by_id_query,
+    get_events_by_category_query,
+    update_event_query,
+)
+from src.event_module.utils.event.text.details import DETAILS
+from src.event_module.utils.event.text.messages import MESSAGE
 from src.utils import STATUS, return_json
-
-
-@logger.catch
-def convert_row_to_event(event_row: Event) -> Optional[List[Event]]:
-    event = Event(
-        id=event_row[0].id,
-        name=event_row[0].name,
-        description=event_row[0].description,
-        date_start=event_row[0].date_start,
-        date_end=event_row[0].date_end,
-        reg_deadline=event_row[0].reg_deadline,
-        max_users=event_row[0].max_users,
-        category_id=event_row[0].category_id,
-        address=event_row[0].address,
-    )
-    return event
-
-
-@logger.catch
-def convert_rows_to_event_list(event_rows: List[Event]) -> Optional[List[Event]]:
-    return [convert_row_to_event(event_row=event_row) for event_row in event_rows]
-
-
-@logger.catch
-async def get_all_events_query(session: AsyncSession) -> Optional[List[EventRead]]:
-    try:
-        event_rows = await session.execute(select(Event))
-        events = convert_rows_to_event_list(event_rows=event_rows.all())
-        return events
-    except Exception as e:
-        logger.error(str(e))
-        return None
-
-
-@logger.catch
-async def get_event_by_id_query(
-    event_id: int, session: AsyncSession
-) -> Optional[EventRead]:
-    try:
-        event_rows = await session.execute(select(Event).filter(Event.id == event_id))
-        event = convert_row_to_event(event_row=event_rows.one())
-        return event
-    except Exception as e:
-        logger.error(str(e))
-        return None
 
 
 @logger.catch
@@ -72,6 +31,34 @@ async def get_all_events_response(session: AsyncSession) -> dict:
         logger.error(str(e))
         return return_json(
             status=STATUS[400], message=MESSAGE["get_all_events_error"], details=str(e)
+        )
+
+
+@logger.catch
+async def get_events_by_category_response(
+    category_id: int, session: AsyncSession
+) -> dict:
+    try:
+        events = await get_events_by_category_query(
+            category_id=category_id, session=session
+        )
+        if events is not None:
+            data = {"events_count": len(events), "events": events}
+            return return_json(
+                status=STATUS[200],
+                message=MESSAGE["get_events_by_category_success"].format(
+                    category_id=category_id
+                ),
+                data=data,
+            )
+        else:
+            raise Exception()
+    except Exception as e:
+        logger.error(str(e))
+        return return_json(
+            status=STATUS[400],
+            message=MESSAGE["get_events_by_category_error"],
+            details=str(e),
         )
 
 
@@ -98,18 +85,6 @@ async def get_event_by_id_response(event_id: int, session: AsyncSession) -> dict
 
 
 @logger.catch
-async def create_event_query(
-    event: EventCreate, session: AsyncSession
-) -> Optional[IntegrityError]:
-    try:
-        event.fix_time()
-        await session.execute(insert(Event).values(**event.dict()))
-        await session.commit()
-    except IntegrityError as e:
-        return e
-
-
-@logger.catch
 async def create_event_response(event: EventCreate, session: AsyncSession) -> dict:
     try:
         error = await create_event_query(event=event, session=session)
@@ -129,25 +104,10 @@ async def create_event_response(event: EventCreate, session: AsyncSession) -> di
 
 
 @logger.catch
-async def update_event_query(
-    event: EventUpdate, session: AsyncSession
-) -> Optional[IntegrityError]:
-    try:
-        event.fix_time()
-        await session.execute(
-            update(Event).values(**event.dict()).where(Event.id == event.id)
-        )
-        await session.commit()
-    except IntegrityError as e:
-        return e
-
-
-@logger.catch
 async def update_event_response(event: EventUpdate, session: AsyncSession) -> dict:
     try:
         if event.id in [
-            existing.id
-            for existing in await get_all_events_query(session=session)
+            existing.id for existing in await get_all_events_query(session=session)
         ]:
             error = await update_event_query(event=event, session=session)
             if error is None:
@@ -172,22 +132,10 @@ async def update_event_response(event: EventUpdate, session: AsyncSession) -> di
 
 
 @logger.catch
-async def delete_event_query(
-    event_id: int, session: AsyncSession
-) -> Optional[IntegrityError]:
-    try:
-        await session.execute(delete(Event).where(Event.id == event_id))
-        await session.commit()
-    except IntegrityError as e:
-        return e
-
-
-@logger.catch
 async def delete_event_response(event_id: int, session: AsyncSession) -> dict:
     try:
         if event_id in [
-            existing.id
-            for existing in await get_all_events_query(session=session)
+            existing.id for existing in await get_all_events_query(session=session)
         ]:
             error = await delete_event_query(event_id=event_id, session=session)
             if error is None:

@@ -5,10 +5,10 @@ from sqlalchemy import engine_from_config, pool
 
 from src.config import DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT, DB_USER
 from src.database import metadata
-from src.event.models import *
-from src.tour.models import *
-from src.university.models import *
-from src.user.models import *
+from src.event_module.models import *
+from src.tour_module.models import *
+from src.university_module.models import *
+from src.user_module.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

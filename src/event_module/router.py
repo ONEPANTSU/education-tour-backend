@@ -2,14 +2,25 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.event.schemas import EventCreate, EventUpdate, CategoryCreate, CategoryUpdate
-from src.event.utils.utils_category import get_all_categories_response, get_category_by_id_response, \
-    create_category_response, update_category_response, delete_category_response
-from src.event.utils.utils_event import (
+from src.event_module.schemas import (
+    CategoryCreate,
+    CategoryUpdate,
+    EventCreate,
+    EventUpdate,
+)
+from src.event_module.utils.category.responses import (
+    create_category_response,
+    delete_category_response,
+    get_all_categories_response,
+    get_category_by_id_response,
+    update_category_response,
+)
+from src.event_module.utils.event.responses import (
     create_event_response,
     delete_event_response,
     get_all_events_response,
     get_event_by_id_response,
+    get_events_by_category_response,
     update_event_response,
 )
 
@@ -20,6 +31,15 @@ category_router = APIRouter(prefix="/event/category", tags=["category"])
 @event_router.get("/")
 async def get_all_events(session: AsyncSession = Depends(get_async_session)) -> dict:
     return await get_all_events_response(session=session)
+
+
+@event_router.get("/category_filter/{category_id}")
+async def get_events_by_category(
+    category_id: int, session: AsyncSession = Depends(get_async_session)
+) -> dict:
+    return await get_events_by_category_response(
+        category_id=category_id, session=session
+    )
 
 
 @event_router.get("/{event_id}")
@@ -51,7 +71,9 @@ async def delete_event(
 
 
 @category_router.get("/")
-async def get_all_categories(session: AsyncSession = Depends(get_async_session)) -> dict:
+async def get_all_categories(
+    session: AsyncSession = Depends(get_async_session),
+) -> dict:
     return await get_all_categories_response(session=session)
 
 
