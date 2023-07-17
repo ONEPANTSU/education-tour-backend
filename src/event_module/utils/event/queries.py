@@ -25,6 +25,23 @@ async def get_all_events_query(session: AsyncSession) -> Optional[List[EventRead
 
 
 @logger.catch
+async def get_events_by_categories_query(
+    category_list: List[int], session: AsyncSession
+) -> Optional[List[EventRead]]:
+    try:
+        events = []
+        for category_id in category_list:
+            event_rows = await session.execute(
+                select(Event).filter(Event.category_id == category_id)
+            )
+            events.append(convert_rows_to_event_list(event_rows=event_rows.all()))
+        return events
+    except Exception as e:
+        logger.error(str(e))
+        return None
+
+
+@logger.catch
 async def get_events_by_category_query(
     category_id: int, session: AsyncSession
 ) -> Optional[List[EventRead]]:

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import List
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -21,7 +23,7 @@ from src.event_module.utils.event.responses import (
     get_all_events_response,
     get_event_by_id_response,
     get_events_by_category_response,
-    update_event_response,
+    update_event_response, get_events_by_categories_response,
 )
 
 event_router = APIRouter(prefix="/event", tags=["event"])
@@ -31,6 +33,15 @@ category_router = APIRouter(prefix="/event/category", tags=["category"])
 @event_router.get("/")
 async def get_all_events(session: AsyncSession = Depends(get_async_session)) -> dict:
     return await get_all_events_response(session=session)
+
+
+@event_router.get("/category_filter/")
+async def get_events_by_categories(
+    category_list: List[int] = Query(), session: AsyncSession = Depends(get_async_session)
+) -> dict:
+    return await get_events_by_categories_response(
+        category_list=category_list, session=session
+    )
 
 
 @event_router.get("/category_filter/{category_id}")

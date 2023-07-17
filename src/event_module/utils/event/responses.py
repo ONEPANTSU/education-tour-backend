@@ -1,3 +1,5 @@
+from typing import List
+
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +11,7 @@ from src.event_module.utils.event.queries import (
     get_all_events_query,
     get_event_by_id_query,
     get_events_by_category_query,
-    update_event_query,
+    update_event_query, get_events_by_categories_query,
 )
 from src.event_module.utils.event.text.details import DETAILS
 from src.event_module.utils.event.text.messages import MESSAGE
@@ -31,6 +33,34 @@ async def get_all_events_response(session: AsyncSession) -> dict:
         logger.error(str(e))
         return return_json(
             status=STATUS[400], message=MESSAGE["get_all_events_error"], details=str(e)
+        )
+
+
+@logger.catch
+async def get_events_by_categories_response(
+    category_list: List[int], session: AsyncSession
+) -> dict:
+    try:
+        events = await get_events_by_categories_query(
+            category_list=category_list, session=session
+        )
+        if events is not None:
+            data = {"events_count": len(events), "events": events}
+            return return_json(
+                status=STATUS[200],
+                message=MESSAGE["get_events_by_category_success"].format(
+                    category_id=category_list
+                ),
+                data=data,
+            )
+        else:
+            raise Exception()
+    except Exception as e:
+        logger.error(str(e))
+        return return_json(
+            status=STATUS[400],
+            message=MESSAGE["get_events_by_category_error"],
+            details=str(e),
         )
 
 
