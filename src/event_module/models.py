@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String
+from sqlalchemy import JSON, TIMESTAMP, Column, ForeignKey, Integer, String
 
 from src.database import Base, metadata
 
@@ -23,4 +23,4 @@ class Event(Base):
     reg_deadline = Column(TIMESTAMP, default=datetime.utcnow)
     max_users = Column(Integer, nullable=True)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
-    address = Column(String, nullable=True)
+    address = Column(JSON, nullable=True)

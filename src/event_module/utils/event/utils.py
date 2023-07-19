@@ -1,13 +1,19 @@
+import json
 from typing import List, Optional
 
 from loguru import logger
 
 from src.event_module.models import Event
+from src.event_module.schemas import Address, EventRead
 
 
 @logger.catch
-def convert_row_to_event(event_row: Event) -> Optional[List[Event]]:
-    event = Event(
+def convert_row_to_event(event_row: Event) -> Optional[EventRead]:
+    if type(event_row[0].address) is str:
+        address = Address(**json.loads(event_row[0].address))
+    else:
+        address = event_row[0].address
+    event = EventRead(
         id=event_row[0].id,
         name=event_row[0].name,
         description=event_row[0].description,
@@ -16,11 +22,11 @@ def convert_row_to_event(event_row: Event) -> Optional[List[Event]]:
         reg_deadline=event_row[0].reg_deadline,
         max_users=event_row[0].max_users,
         category_id=event_row[0].category_id,
-        address=event_row[0].address,
+        address=address,
     )
     return event
 
 
 @logger.catch
-def convert_rows_to_event_list(event_rows: List[Event]) -> Optional[List[Event]]:
+def convert_rows_to_event_list(event_rows: List[Event]) -> Optional[List[EventRead]]:
     return [convert_row_to_event(event_row=event_row) for event_row in event_rows]

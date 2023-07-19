@@ -13,17 +13,18 @@ from src.event_module.utils.category.queries import (
 from src.event_module.utils.category.text.details import DETAILS
 from src.event_module.utils.category.text.messages import MESSAGE
 from src.event_module.utils.event.queries import get_all_events_query
-from src.utils import STATUS, return_json
+from src.schemas import Response
+from src.utils import Status, return_json
 
 
 @logger.catch
-async def get_all_categories_response(session: AsyncSession) -> dict:
+async def get_all_categories_response(session: AsyncSession) -> Response:
     try:
         categories = await get_all_categories_query(session=session)
         if categories is not None:
             data = {"categories_count": len(categories), "categories": categories}
             return return_json(
-                status=STATUS[200],
+                status=Status.SUCCESS,
                 message=MESSAGE["get_all_categories_success"],
                 data=data,
             )
@@ -32,14 +33,16 @@ async def get_all_categories_response(session: AsyncSession) -> dict:
     except Exception as e:
         logger.error(str(e))
         return return_json(
-            status=STATUS[400],
+            status=Status.ERROR,
             message=MESSAGE["get_all_categories_error"],
             details=str(e),
         )
 
 
 @logger.catch
-async def get_category_by_id_response(category_id: int, session: AsyncSession) -> dict:
+async def get_category_by_id_response(
+    category_id: int, session: AsyncSession
+) -> Response:
     try:
         category = await get_category_by_id_query(
             category_id=category_id, session=session
@@ -47,7 +50,7 @@ async def get_category_by_id_response(category_id: int, session: AsyncSession) -
         if category is not None:
             data = {"category": category}
             return return_json(
-                status=STATUS[200],
+                status=Status.SUCCESS,
                 message=MESSAGE["get_one_category_success"].format(
                     category_id=category_id
                 ),
@@ -58,7 +61,7 @@ async def get_category_by_id_response(category_id: int, session: AsyncSession) -
     except Exception as e:
         logger.error(str(e))
         return return_json(
-            status=STATUS[400],
+            status=Status.ERROR,
             message=MESSAGE["get_one_category_error"].format(category_id=category_id),
             details=str(e),
         )
@@ -67,19 +70,19 @@ async def get_category_by_id_response(category_id: int, session: AsyncSession) -
 @logger.catch
 async def create_category_response(
     category: CategoryCreate, session: AsyncSession
-) -> dict:
+) -> Response:
     try:
         error = await create_category_query(category=category, session=session)
         if error is None:
             return return_json(
-                status=STATUS[200], message=MESSAGE["create_category_success"]
+                status=Status.SUCCESS, message=MESSAGE["create_category_success"]
             )
         else:
             raise error
     except Exception as e:
         logger.error(str(e))
         return return_json(
-            status=STATUS[400],
+            status=Status.ERROR,
             message=MESSAGE["create_category_error"],
             details=str(e),
         )
@@ -88,7 +91,7 @@ async def create_category_response(
 @logger.catch
 async def update_category_response(
     category: CategoryUpdate, session: AsyncSession
-) -> dict:
+) -> Response:
     try:
         if category.id in [
             existing.id for existing in await get_all_categories_query(session=session)
@@ -96,7 +99,7 @@ async def update_category_response(
             error = await update_category_query(category=category, session=session)
             if error is None:
                 return return_json(
-                    status=STATUS[200],
+                    status=Status.SUCCESS,
                     message=MESSAGE["update_category_success"].format(
                         category_id=category.id
                     ),
@@ -105,7 +108,7 @@ async def update_category_response(
                 raise error
         else:
             return return_json(
-                status=STATUS[400],
+                status=Status.ERROR,
                 message=MESSAGE["update_category_error"].format(
                     category_id=category.id
                 ),
@@ -114,13 +117,13 @@ async def update_category_response(
     except IntegrityError as e:
         logger.error(str(e))
         return return_json(
-            status=STATUS[400],
+            status=Status.ERROR,
             message=MESSAGE["update_category_error"].format(category_id=category.id),
         )
 
 
 @logger.catch
-async def delete_category_response(category_id: int, session: AsyncSession) -> dict:
+async def delete_category_response(category_id: int, session: AsyncSession) -> Response:
     try:
         if category_id not in [
             existing_event.category_id
@@ -135,7 +138,7 @@ async def delete_category_response(category_id: int, session: AsyncSession) -> d
                 )
                 if error is None:
                     return return_json(
-                        status=STATUS[200],
+                        status=Status.SUCCESS,
                         message=MESSAGE["delete_category_success"].format(
                             category_id=category_id
                         ),
@@ -144,7 +147,7 @@ async def delete_category_response(category_id: int, session: AsyncSession) -> d
                     raise error
             else:
                 return return_json(
-                    status=STATUS[400],
+                    status=Status.ERROR,
                     message=MESSAGE["delete_category_error"].format(
                         category_id=category_id
                     ),
@@ -154,7 +157,7 @@ async def delete_category_response(category_id: int, session: AsyncSession) -> d
                 )
         else:
             return return_json(
-                status=STATUS[400],
+                status=Status.ERROR,
                 message=MESSAGE["delete_category_error"].format(
                     category_id=category_id
                 ),
@@ -165,6 +168,6 @@ async def delete_category_response(category_id: int, session: AsyncSession) -> d
     except IntegrityError as e:
         logger.error(str(e))
         return return_json(
-            status=STATUS[400],
+            status=Status.ERROR,
             message=MESSAGE["delete_category_error"].format(category_id=category_id),
         )
