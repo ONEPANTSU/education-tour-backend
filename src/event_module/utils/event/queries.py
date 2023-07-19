@@ -34,7 +34,7 @@ async def get_events_by_categories_query(
             event_rows = await session.execute(
                 select(Event).filter(Event.category_id == category_id)
             )
-            events.append(convert_rows_to_event_list(event_rows=event_rows.all()))
+            events += convert_rows_to_event_list(event_rows=event_rows.all())
         return events
     except Exception as e:
         logger.error(str(e))

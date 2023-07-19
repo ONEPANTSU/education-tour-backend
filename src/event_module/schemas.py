@@ -1,7 +1,20 @@
+import json
 from datetime import datetime
 
 from loguru import logger
 from pydantic import BaseModel
+
+
+class Address(BaseModel):
+    country: str = None
+    city: str = None
+    street: str = None
+    house: int = None
+    corps: int = None
+    building: int = None
+    level: int = None
+    flat: int = None
+    office: int = None
 
 
 class EventCreate(BaseModel):
@@ -12,7 +25,7 @@ class EventCreate(BaseModel):
     reg_deadline: datetime
     max_users: int
     category_id: int
-    address: str
+    address: Address
 
     @logger.catch
     def fix_time(self) -> None:
@@ -30,7 +43,7 @@ class EventRead(BaseModel):
     reg_deadline: datetime
     max_users: int
     category_id: int
-    address: str
+    address: Address
 
 
 class EventUpdate(BaseModel):
@@ -42,7 +55,7 @@ class EventUpdate(BaseModel):
     reg_deadline: datetime
     max_users: int
     category_id: int
-    address: str
+    address: Address
 
     @logger.catch
     def fix_time(self) -> None:

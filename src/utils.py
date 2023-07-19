@@ -1,17 +1,22 @@
+from enum import Enum
+
 from loguru import logger
 
-STATUS = {200: "success", 400: "error"}
+from src.schemas import Response
+
+
+class Status(Enum):
+    SUCCESS = "200 Success"
+    ERROR = "400 Error"
 
 
 def return_json(
-    status: STATUS, message: str = None, data: dict = None, details: str = None
-) -> dict:
-    return {
-        "status": status,
-        "message": message,
-        "data": data,
-        "details": details,
-    }
+    status: Status = Status.ERROR,
+    message: str = None,
+    data: dict = None,
+    details: str = None,
+) -> Response:
+    return Response(status=status.value, message=message, data=data, details=details)
 
 
 logger.add(
