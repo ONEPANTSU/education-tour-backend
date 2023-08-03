@@ -1,13 +1,15 @@
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from loguru import logger
 from pydantic import BaseModel
 
+from src.address_schema import Address
+
 
 class TourCreate(BaseModel):
     name: str
-    city: str
+    address: Optional[Address]
     description: str
     date_start: datetime
     date_end: datetime
@@ -25,7 +27,7 @@ class TourCreate(BaseModel):
 class TourRead(BaseModel):
     id: int
     name: str
-    city: str
+    address: Optional[Address]
     description: str
     date_start: datetime
     date_end: datetime
@@ -37,7 +39,7 @@ class TourRead(BaseModel):
 class TourUpdate(BaseModel):
     id: int
     name: str
-    city: str
+    address: Optional[Address]
     description: str
     date_start: datetime
     date_end: datetime

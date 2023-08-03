@@ -1,11 +1,12 @@
 from httpx import AsyncClient
 
 from src.event_module.schemas import CategoryRead
-from src.event_module.utils.category.text.messages import MESSAGE
+from src.event_module.database.category.text.category_message import CategoryMessage
 from src.schemas import Response
 from src.utils import Status, return_json
 from tests.test_event_module.constants.category_constants import CATEGORIES
 
+category_message = CategoryMessage()
 
 async def test_create_category(ac: AsyncClient):
     json = (await ac.post("/event/category/", json={"name": CATEGORIES[0].name})).json()
@@ -16,7 +17,7 @@ async def test_create_category(ac: AsyncClient):
         details=json["details"],
     )
     correct_response = return_json(
-        status=Status.SUCCESS, message=MESSAGE["create_category_success"]
+        status=Status.SUCCESS, message=category_message.get("create_success")
     )
     assert response == correct_response
 
@@ -42,8 +43,8 @@ async def test_get_category_by_id(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["get_one_category_success"].format(
-            category_id=CATEGORIES[0].id
+        message=category_message.get("get_one_success").format(
+            id=CATEGORIES[0].id
         ),
         data={
             "category": CategoryRead(
@@ -70,7 +71,7 @@ async def test_update_category(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["update_category_success"].format(category_id=CATEGORIES[0].id),
+        message=category_message.get("update_success").format(id=CATEGORIES[0].id),
     )
 
     get_json = (await ac.get(f"/event/category/{CATEGORIES[0].id}")).json()
@@ -93,7 +94,7 @@ async def test_delete_category(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["delete_category_success"].format(category_id=CATEGORIES[0].id),
+        message=category_message.get("delete_success").format(id=CATEGORIES[0].id),
     )
 
     get_json = (await ac.get(f"/event/category/")).json()

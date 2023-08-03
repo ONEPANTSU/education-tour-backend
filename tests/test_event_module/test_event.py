@@ -1,6 +1,6 @@
 from httpx import AsyncClient
 
-from src.event_module.utils.event.text.messages import MESSAGE
+from src.event_module.database.event.text.event_message import EventMessage
 from src.schemas import Response
 from src.utils import Status, return_json
 from tests.test_event_module.constants.event_constants import (
@@ -9,6 +9,8 @@ from tests.test_event_module.constants.event_constants import (
     EVENTS_READ,
     EVENTS_UPDATE,
 )
+
+event_message = EventMessage()
 
 
 async def test_create_event(ac: AsyncClient):
@@ -22,7 +24,7 @@ async def test_create_event(ac: AsyncClient):
         details=json["details"],
     )
     correct_response = return_json(
-        status=Status.SUCCESS, message=MESSAGE["create_event_success"]
+        status=Status.SUCCESS, message=event_message.get("create_success")
     )
     assert response == correct_response
 
@@ -49,7 +51,7 @@ async def test_get_event_by_id(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["get_one_event_success"].format(event_id=EVENTS_READ[1]["id"]),
+        message=event_message.get("get_one_success").format(id=EVENTS_READ[1]["id"]),
         data={"event": EVENTS_READ[1]},
     )
 
@@ -68,8 +70,8 @@ async def test_get_events_by_category(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["get_events_by_category_success"].format(
-            category_id=EVENTS_READ[1]["category_id"]
+        message=event_message.get("get_by_category_success").format(
+            id=EVENTS_READ[1]["category_id"]
         ),
         data={"events_count": 1, "events": [EVENTS_READ[1]]},
     )
@@ -92,8 +94,8 @@ async def test_get_events_by_categories(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["get_events_by_category_success"].format(
-            category_id=[EVENTS_READ[0]["category_id"], EVENTS_READ[1]["category_id"]]
+        message=event_message.get("get_by_category_success").format(
+            id=[EVENTS_READ[0]["category_id"], EVENTS_READ[1]["category_id"]]
         ),
         data={"events_count": 2, "events": EVENTS_READ},
     )
@@ -116,7 +118,7 @@ async def test_update_event(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["update_event_success"].format(event_id=EVENTS_UPDATE[0]["id"]),
+        message=event_message.get("update_success").format(id=EVENTS_UPDATE[0]["id"]),
     )
 
     get_json = (await ac.get(f"/event/{EVENTS_UPDATE[0]['id']}")).json()
@@ -139,7 +141,7 @@ async def test_delete_event(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=MESSAGE["delete_event_success"].format(event_id=EVENTS_READ[0]["id"]),
+        message=event_message.get("delete_success").format(id=EVENTS_READ[0]["id"]),
     )
 
     await ac.delete(

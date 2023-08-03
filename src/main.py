@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from src.event_module.router import category_router, event_router
+from src.tour_module.router import tour_router
 
 app = FastAPI(title="Education Tourism")
 
@@ -18,3 +19,4 @@ app.add_middleware(
 
 app.include_router(event_router)
 app.include_router(category_router)
+app.include_router(tour_router)

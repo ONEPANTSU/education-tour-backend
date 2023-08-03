@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import TIMESTAMP,  Column, ForeignKey, Integer, String
+from sqlalchemy import JSON, TIMESTAMP, Column, ForeignKey, Integer, String
 
 from src.database import Base, metadata
 from src.event_module.models import Event
@@ -11,7 +11,7 @@ class Tour(Base):
     metadata = metadata
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    city = Column(String, nullable=False)
+    address = Column(JSON, nullable=True)
     description = Column(String, nullable=False)
     date_start = Column(TIMESTAMP, default=datetime.utcnow)
     date_end = Column(TIMESTAMP, default=datetime.utcnow)
@@ -25,4 +25,3 @@ class TourEvent(Base):
     id = Column(Integer, primary_key=True)
     tour_id = Column(Integer, ForeignKey(Tour.id), nullable=False)
     event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
-
