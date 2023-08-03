@@ -24,3 +24,18 @@ class Event(Base):
     max_users = Column(Integer, nullable=True)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
     address = Column(JSON, nullable=True)
+
+
+class Tag(Base):
+    __tablename__ = "tag"
+    metadata = metadata
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+
+
+class EventTag(Base):
+    __tablename__ = "event_tag"
+    metadata = metadata
+    id = Column(Integer, primary_key=True)
+    event_id = Column(Integer, ForeignKey(Event.id), nullable=False)
+    tag_id = Column(Integer, ForeignKey(Tag.id), nullable=False)

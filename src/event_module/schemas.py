@@ -76,3 +76,17 @@ class CategoryRead(BaseModel):
 class CategoryUpdate(BaseModel):
     id: int
     name: str
+
+
+class TagCreate(BaseModel):
+    name: str
+
+
+class TagRead(BaseModel):
+    id: int
+    name: str
+
+
+class TagUpdate(BaseModel):
+    id: int
+    name: str
