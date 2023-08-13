@@ -1,4 +1,5 @@
 from src.database_utils.cascade_base_response_handler import CascadeBaseResponseHandler
+from src.event_module.database.event_tag.event_tag_models import EventTagFilter
 from src.event_module.database.event_tag.event_tag_query import EventTagQuery
 from src.event_module.database.tag.tag_models import TagModels
 from src.event_module.database.tag.tag_query import TagQuery
@@ -14,7 +15,7 @@ class TagResponseHandler(CascadeBaseResponseHandler):
     _details: TagDetails = TagDetails()
 
     _dependencies: dict[EventTagQuery, object] = {
-        EventTagQuery(): EventTagQuery.dependency_fields["tag_id"]
+        EventTagQuery(): EventTagQuery.dependency_fields[EventTagFilter.TAG]
     }
 
     _models: TagModels = TagModels()
