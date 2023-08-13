@@ -1,24 +1,28 @@
-from typing import List
-
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database_utils.base_response_handeler import BaseResponseHandler
+from src.database_utils.base_query import BaseQuery
+from src.database_utils.cascade_base_response_handler import CascadeBaseResponseHandler
 from src.event_module.database.event.event_models import EventModels
 from src.event_module.database.event.event_query import EventQuery
 from src.event_module.database.event.text.event_data_key import EventDataKey
 from src.event_module.database.event.text.event_details import EventDetails
 from src.event_module.database.event.text.event_message import EventMessage
+from src.event_module.database.event_tag.event_tag_query import EventTagQuery
 from src.schemas import Response
 from src.utils import Status, return_json
 
 
-class EventResponseHandler(BaseResponseHandler):
+class EventResponseHandler(CascadeBaseResponseHandler):
     _query: EventQuery = EventQuery()
     _message: EventMessage = EventMessage()
     _data_key: EventDataKey = EventDataKey()
     _details: EventDetails = EventDetails()
+
+    _dependencies: dict[BaseQuery, object] = {
+        EventTagQuery(): EventTagQuery.dependency_fields["event_id"]
+    }
 
     _models: EventModels = EventModels()
     _schema_create_class: type = _models.create_class
@@ -48,7 +52,7 @@ class EventResponseHandler(BaseResponseHandler):
 
     @logger.catch
     async def get_by_categories(
-        self, category_list: List[int], session: AsyncSession
+        self, category_list: list[int], session: AsyncSession
     ) -> Response:
         try:
             events = await self._query.get_by_categories_query(

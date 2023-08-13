@@ -1,9 +1,9 @@
 from src.database_utils.base_query import BaseQuery
-from src.event_module.database.category.category_models import CategoryModels
+from src.event_module.database.tag.tag_models import TagModels
 
 
-class CategoryQuery(BaseQuery):
-    _models: CategoryModels = CategoryModels()
+class TagQuery(BaseQuery):
+    _models: TagModels = TagModels()
 
     _schema_create_class: type = _models.create_class
     _schema_update_class: type = _models.update_class

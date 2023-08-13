@@ -1,6 +1,7 @@
 from abc import ABC
 
 from pydantic import BaseModel
+from sqlalchemy.orm import DeclarativeMeta
 
 from src.database import Base
 

@@ -1,12 +1,13 @@
 from httpx import AsyncClient
 
-from src.event_module.schemas import CategoryRead
 from src.event_module.database.category.text.category_message import CategoryMessage
+from src.event_module.schemas import CategoryRead
 from src.schemas import Response
 from src.utils import Status, return_json
 from tests.test_event_module.constants.category_constants import CATEGORIES
 
 category_message = CategoryMessage()
+
 
 async def test_create_category(ac: AsyncClient):
     json = (await ac.post("/event/category/", json={"name": CATEGORIES[0].name})).json()
@@ -43,9 +44,7 @@ async def test_get_category_by_id(ac: AsyncClient):
     )
     correct_response = return_json(
         status=Status.SUCCESS,
-        message=category_message.get("get_one_success").format(
-            id=CATEGORIES[0].id
-        ),
+        message=category_message.get("get_one_success").format(id=CATEGORIES[0].id),
         data={
             "category": CategoryRead(
                 id=CATEGORIES[0].id, name=CATEGORIES[0].name

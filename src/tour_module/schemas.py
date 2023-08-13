@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import List, Optional
 
 from loguru import logger
 from pydantic import BaseModel
@@ -9,13 +8,13 @@ from src.address_schema import Address
 
 class TourCreate(BaseModel):
     name: str
-    address: Optional[Address]
+    address: Address | None
     description: str
     date_start: datetime
     date_end: datetime
     reg_deadline: datetime
     max_users: int
-    events: List[int]
+    events: list[int]
 
     @logger.catch
     def fix_time(self) -> None:
@@ -27,25 +26,25 @@ class TourCreate(BaseModel):
 class TourRead(BaseModel):
     id: int
     name: str
-    address: Optional[Address]
+    address: Address | None
     description: str
     date_start: datetime
     date_end: datetime
     reg_deadline: datetime
     max_users: int
-    events: List[int]
+    events: list[int]
 
 
 class TourUpdate(BaseModel):
     id: int
     name: str
-    address: Optional[Address]
+    address: Address | None
     description: str
     date_start: datetime
     date_end: datetime
     reg_deadline: datetime
     max_users: int
-    events: List[int]
+    events: list[int]
 
     @logger.catch
     def fix_time(self) -> None:

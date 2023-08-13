@@ -1,6 +1,5 @@
-from typing import List
-
 from fastapi import APIRouter, Depends, Query
+from pydantic.typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -8,19 +7,31 @@ from src.event_module.database.category.category_response_handler import (
     CategoryResponseHandler,
 )
 from src.event_module.database.event.event_response_handler import EventResponseHandler
+from src.event_module.database.event_tag.event_tag_response_handler import (
+    EventTagFilter,
+    EventTagResponseHandler,
+)
+from src.event_module.database.tag.tag_response_handler import TagResponseHandler
 from src.event_module.schemas import (
     CategoryCreate,
     CategoryUpdate,
     EventCreate,
+    EventTagListCreate,
+    EventTagListDelete,
     EventUpdate,
+    TagCreate,
+    TagUpdate,
 )
 from src.schemas import Response
 
 event_router = APIRouter(prefix="/event", tags=["event"])
 category_router = APIRouter(prefix="/event/category", tags=["category"])
+tag_router = APIRouter(prefix="/event/tag", tags=["tag"])
 
 event_response_handler = EventResponseHandler()
 category_response_handler = CategoryResponseHandler()
+tag_response_handler = TagResponseHandler()
+event_tag_response_handler = EventTagResponseHandler()
 
 
 @event_router.get("/", response_model=Response)
@@ -32,7 +43,7 @@ async def get_all_events(
 
 @event_router.get("/category_filter/", response_model=Response)
 async def get_events_by_categories(
-    category_list: List[int] = Query(),
+    category_list: list[int] = Query(),
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     return await event_response_handler.get_by_categories(
@@ -116,3 +127,74 @@ async def delete_category(
     category_id: int, session: AsyncSession = Depends(get_async_session)
 ) -> Response:
     return await category_response_handler.delete(model_id=category_id, session=session)
+
+
+@tag_router.get("/", response_model=Response)
+async def get_all_tags(
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    return await tag_response_handler.get_all(session=session)
+
+
+@tag_router.get("/{tag_id}", response_model=Response)
+async def get_tag_by_id(
+    tag_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await tag_response_handler.get_by_id(model_id=tag_id, session=session)
+
+
+@tag_router.post("/", response_model=Response)
+async def create_tag(
+    tag: TagCreate, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await tag_response_handler.create(model_create=tag, session=session)
+
+
+@tag_router.put("/{tag_id}", response_model=Response)
+async def update_tag(
+    tag: TagUpdate, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await tag_response_handler.update(model_update=tag, session=session)
+
+
+@tag_router.delete("/{tag_id}", response_model=Response)
+async def delete_tag(
+    tag_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await tag_response_handler.delete(model_id=tag_id, session=session)
+
+
+@event_router.post("/{event_id}/set_tags", response_model=Response)
+async def set_tags(
+    event_tag: EventTagListCreate, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await event_tag_response_handler.create_list(
+        model_create=event_tag, session=session
+    )
+
+
+@tag_router.get("/event_filter/{event_id}", response_model=Response)
+async def get_tag_id_list_by_event_id(
+    event_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await event_tag_response_handler.get_by_filter(
+        event_tag_filter=EventTagFilter.EVENT, value=event_id, session=session
+    )
+
+
+@event_router.get("/tag_filter/{tag_id}", response_model=Response)
+async def get_event_id_list_by_tag_id(
+    tag_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await event_tag_response_handler.get_by_filter(
+        event_tag_filter=EventTagFilter.TAG, value=tag_id, session=session
+    )
+
+
+@event_router.delete("/{event_id}/event_tag", response_model=Response)
+async def delete_event_tag(
+    event_tags: EventTagListDelete, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await event_tag_response_handler.delete_by_delete_schema(
+        model_delete=event_tags, session=session
+    )

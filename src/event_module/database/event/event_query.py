@@ -1,5 +1,4 @@
 import json
-from typing import List, Optional
 
 from loguru import logger
 from sqlalchemy import insert, select, update
@@ -23,7 +22,7 @@ class EventQuery(BaseQuery):
 
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession
-    ) -> Optional[IntegrityError]:
+    ) -> IntegrityError | None:
         try:
             model_create.fix_time()
             await session.execute(insert(self._model).values(**model_create.dict()))
@@ -31,7 +30,7 @@ class EventQuery(BaseQuery):
         except IntegrityError as e:
             return e
 
-    def _convert_model_to_schema(self, model: _model) -> Optional[_schema_read_class]:
+    def _convert_model_to_schema(self, model: _model) -> _schema_read_class | None:
         if type(model[0].address) is str:
             address = Address(**json.loads(model[0].address))
         else:
@@ -51,7 +50,7 @@ class EventQuery(BaseQuery):
 
     async def update(
         self, model_update: _schema_update_class, session: AsyncSession
-    ) -> Optional[IntegrityError]:
+    ) -> IntegrityError | None:
         try:
             model_update.fix_time()
             await session.execute(
@@ -64,8 +63,8 @@ class EventQuery(BaseQuery):
             return e
 
     async def get_by_categories_query(
-        self, category_list: List[int], session: AsyncSession
-    ) -> Optional[List[EventRead]]:
+        self, category_list: list[int], session: AsyncSession
+    ) -> list[EventRead] | None:
         try:
             events = []
             for category_id in category_list:
@@ -80,7 +79,7 @@ class EventQuery(BaseQuery):
 
     async def get_by_category_query(
         self, category_id: int, session: AsyncSession
-    ) -> Optional[List[EventRead]]:
+    ) -> list[EventRead] | None:
         try:
             event_rows = await session.execute(
                 select(Event).filter(Event.category_id == category_id)

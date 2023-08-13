@@ -1,13 +1,11 @@
-from typing import Optional
-
 from pydantic import BaseModel
 
 
 class BaseResponse(BaseModel):
-    status: Optional[str] = "success"
-    message: Optional[str] = "Сообщение"
-    data: Optional[dict] = None
-    details: Optional[str] = "Детали"
+    status: str | None = "success"
+    message: str | None = "Сообщение"
+    data: dict | None = None
+    details: str | None = "Детали"
 
 
 class Response(BaseResponse):
