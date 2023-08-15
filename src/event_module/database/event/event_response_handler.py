@@ -12,6 +12,8 @@ from src.event_module.database.event.text.event_message import EventMessage
 from src.event_module.database.event_tag.event_tag_models import EventTagFilter
 from src.event_module.database.event_tag.event_tag_query import EventTagQuery
 from src.schemas import Response
+from src.tour_module.database.tour_event.tour_event_models import TourEventFilter
+from src.tour_module.database.tour_event.tour_event_query import TourEventQuery
 from src.utils import Status, return_json
 
 
@@ -22,7 +24,8 @@ class EventResponseHandler(CascadeBaseResponseHandler):
     _details: EventDetails = EventDetails()
 
     _dependencies: dict[BaseQuery, object] = {
-        EventTagQuery(): EventTagQuery.dependency_fields[EventTagFilter.EVENT]
+        EventTagQuery(): EventTagQuery.dependency_fields[EventTagFilter.EVENT],
+        TourEventQuery(): TourEventQuery.dependency_fields[TourEventFilter.EVENT],
     }
 
     _models: EventModels = EventModels()

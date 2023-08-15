@@ -2,7 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.base_models import BaseModels
 from src.database_utils.base_query import BaseQuery
-from src.database_utils.base_response_handeler import BaseResponseHandler
+from src.database_utils.base_response_handler import BaseResponseHandler
 from src.database_utils.dependent_base_query import DependentBaseQuery
 from src.database_utils.text.base_data_key import BaseDataKey
 from src.database_utils.text.base_details import BaseDetails

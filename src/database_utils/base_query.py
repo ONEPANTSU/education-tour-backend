@@ -17,13 +17,6 @@ class AbstractBaseQuery(ABC):
     _model: type = _models.database_table
 
     @abstractmethod
-    def __int__(self, models: BaseModels = BaseModels):
-        self.schema_create_class: type = models.create_class
-        self._schema_update_class: type = models.update_class
-        self._schema_read_class: type = models.read_class
-        self._model: type = models.database_table
-
-    @abstractmethod
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession
     ) -> IntegrityError | None:
@@ -60,12 +53,6 @@ class BaseQuery(AbstractBaseQuery):
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
 
-    def __int__(self, models: BaseModels = BaseModels):
-        self.schema_create_class: type = models.create_class
-        self._schema_update_class: type = models.update_class
-        self._schema_read_class: type = models.read_class
-        self._model: type = models.database_table
-
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession
     ) -> IntegrityError | None:
@@ -86,6 +73,7 @@ class BaseQuery(AbstractBaseQuery):
 
     async def get_all(self, session: AsyncSession) -> list[_schema_read_class] | None:
         try:
+            logger.warning(self._model)
             models = await session.execute(select(self._model))
             schema_list = self._convert_models_to_schema_list(models=models.all())
             return schema_list

@@ -1,30 +1,30 @@
-from enum import Enum
-
 from loguru import logger
+from sqlalchemy import Enum
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.base_response_handler import BaseResponseHandler
-from src.event_module.database.event_tag.event_tag_models import (
-    EventTagFilter,
-    EventTagModels,
-)
-from src.event_module.database.event_tag.event_tag_query import EventTagQuery
-from src.event_module.database.event_tag.text.event_tag_data_key import EventTagDataKey
-from src.event_module.database.event_tag.text.event_tag_details import EventTagDetails
-from src.event_module.database.event_tag.text.event_tag_message import EventTagMessage
-from src.event_module.schemas import EventListRead, EventTagListDelete, TagListRead
 from src.schemas import Response
+from src.tour_module.database.tour_event.text.tour_event_data_key import (
+    TourEventDataKey,
+)
+from src.tour_module.database.tour_event.text.tour_event_details import TourEventDetails
+from src.tour_module.database.tour_event.text.tour_event_message import TourEventMessage
+from src.tour_module.database.tour_event.tour_event_models import (
+    TourEventFilter,
+    TourEventModels,
+)
+from src.tour_module.database.tour_event.tour_event_query import TourEventQuery
 from src.utils import Status, return_json
 
 
-class EventTagResponseHandler(BaseResponseHandler):
-    _query: EventTagQuery = EventTagQuery()
-    _message: EventTagMessage = EventTagMessage()
-    _data_key: EventTagDataKey = EventTagDataKey()
-    _details: EventTagDetails = EventTagDetails()
+class TourEventResponseHandler(BaseResponseHandler):
+    _query: TourEventQuery = TourEventQuery()
+    _message: TourEventMessage = TourEventMessage()
+    _data_key: TourEventDataKey = TourEventDataKey()
+    _details: TourEventDetails = TourEventDetails()
 
-    _models: EventTagModels = EventTagModels()
+    _models: TourEventModels = TourEventModels()
     _schema_create_class: type = _models.create_class
 
     _schema_delete_list_class: type = _models.delete_list_class
@@ -33,21 +33,19 @@ class EventTagResponseHandler(BaseResponseHandler):
     _model: type = _models.database_table
 
     _schema_create_list_class: type = _models.create_list_class
-    _schema_read_tag_list_class: type = _models.read_tag_list_class
     _schema_read_event_list_class: type = _models.read_event_list_class
 
     _readable_schema_filter: dict[Enum, type] = {
-        EventTagFilter.TAG: EventListRead,
-        EventTagFilter.EVENT: TagListRead,
+        TourEventFilter.TOUR: _schema_read_event_list_class,
     }
 
     async def create_list(
         self, model_create: _schema_create_list_class, session: AsyncSession
     ) -> Response:
         try:
-            for event_tag_create in model_create.get_event_tag_create_list():
+            for tour_event_create in model_create.get_tour_event_create_list():
                 error = await self._query.create(
-                    model_create=event_tag_create, session=session
+                    model_create=tour_event_create, session=session
                 )
                 if error is not None:
                     raise error
@@ -63,18 +61,21 @@ class EventTagResponseHandler(BaseResponseHandler):
             )
 
     async def get_by_filter(
-        self, event_tag_filter: EventTagFilter, value: int, session: AsyncSession
+        self,
+        value: int,
+        session: AsyncSession,
+        tour_event_filter: TourEventFilter = TourEventFilter.TOUR,
     ) -> Response:
         try:
             schemas = await self._query.get_by_dependency(
-                dependency_field=self._query.dependency_fields[event_tag_filter],
+                dependency_field=self._query.dependency_fields[tour_event_filter],
                 value=value,
                 session=session,
             )
 
             if schemas is not None:
-                readable_schemas = self._readable_schema_filter[event_tag_filter]()
-                readable_schemas.set_by_event_tag_read(event_tag_read_list=schemas)
+                readable_schemas = self._readable_schema_filter[tour_event_filter]()
+                readable_schemas.set_by_tour_event_read(tour_event_read_list=schemas)
                 data = {
                     self._data_key.get("count"): len(schemas),
                     self._data_key.get("schemas"): readable_schemas,
@@ -96,7 +97,7 @@ class EventTagResponseHandler(BaseResponseHandler):
             )
 
     async def delete_by_delete_schema(
-        self, model_delete: EventTagListDelete, session: AsyncSession
+        self, model_delete: _schema_delete_list_class, session: AsyncSession
     ) -> Response:
         try:
             error = await self._query.delete_by_delete_schema(
@@ -107,9 +108,9 @@ class EventTagResponseHandler(BaseResponseHandler):
                     status=Status.SUCCESS,
                     message=self._message.get("delete_success").format(
                         id="("
-                        + str(model_delete.event_id)
+                        + str(model_delete.tour_id)
                         + " - "
-                        + str(model_delete.tag_list)
+                        + str(model_delete.event_list)
                         + ")"
                     ),
                 )

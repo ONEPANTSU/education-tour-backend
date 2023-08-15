@@ -2,7 +2,7 @@ from loguru import logger
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.database_utils.base_response_handeler import BaseResponseHandler
+from src.database_utils.base_response_handler import BaseResponseHandler
 from src.event_module.database.category.category_models import CategoryModels
 from src.event_module.database.category.category_query import CategoryQuery
 from src.event_module.database.category.text.category_data_key import CategoryDataKey

@@ -1,7 +1,6 @@
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import DeclarativeMeta
 
 from src.database_utils.base_models import BaseModels
 from src.database_utils.base_query import BaseQuery

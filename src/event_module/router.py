@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Query
-from pydantic.typing import Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -23,6 +22,9 @@ from src.event_module.schemas import (
     TagUpdate,
 )
 from src.schemas import Response
+from src.tour_module.database.tour_event.tour_event_responses import (
+    TourEventResponseHandler,
+)
 
 event_router = APIRouter(prefix="/event", tags=["event"])
 category_router = APIRouter(prefix="/event/category", tags=["category"])
@@ -32,6 +34,7 @@ event_response_handler = EventResponseHandler()
 category_response_handler = CategoryResponseHandler()
 tag_response_handler = TagResponseHandler()
 event_tag_response_handler = EventTagResponseHandler()
+tour_event_response_handler = TourEventResponseHandler()
 
 
 @event_router.get("/", response_model=Response)
@@ -170,6 +173,15 @@ async def set_tags(
 ) -> Response:
     return await event_tag_response_handler.create_list(
         model_create=event_tag, session=session
+    )
+
+
+@event_router.get("/tour_filter/{tour_id}", response_model=Response)
+async def get_event_id_list_by_tour_id(
+    tour_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await tour_event_response_handler.get_by_filter(
+        value=tour_id, session=session
     )
 
 

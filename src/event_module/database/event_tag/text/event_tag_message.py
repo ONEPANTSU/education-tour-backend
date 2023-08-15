@@ -15,9 +15,6 @@ update_success = "Успешное изменение связи event_tag #{id}
 delete_error = "Произошла ошибка при удалении связи event_tag #{id}"
 delete_success = "Успешное удаление связи event_tag #{id}"
 
-get_by_event_id_error = ""
-get_by_event_id_success = ""
-
 EVENT_TAG_MESSAGE = {
     "get_all_error": get_all_error,
     "get_all_success": get_all_success,
