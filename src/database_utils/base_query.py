@@ -73,7 +73,6 @@ class BaseQuery(AbstractBaseQuery):
 
     async def get_all(self, session: AsyncSession) -> list[_schema_read_class] | None:
         try:
-            logger.warning(self._model)
             models = await session.execute(select(self._model))
             schema_list = self._convert_models_to_schema_list(models=models.all())
             return schema_list

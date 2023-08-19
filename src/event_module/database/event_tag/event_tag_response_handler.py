@@ -45,6 +45,20 @@ class EventTagResponseHandler(BaseResponseHandler):
         self, model_create: _schema_create_list_class, session: AsyncSession
     ) -> Response:
         try:
+            event_tag_filter = EventTagFilter.EVENT
+
+            schemas = await self._query.get_by_dependency(
+                dependency_field=self._query.dependency_fields[event_tag_filter],
+                value=model_create.event_id,
+                session=session,
+            )
+            if schemas is not None:
+                readable_schemas = self._readable_schema_filter[event_tag_filter]()
+                readable_schemas.set_by_event_tag_read(event_tag_read_list=schemas)
+                for index in range(model_create.tag_list):
+                    if model_create.tag_list[index] in readable_schemas.tag_id_list:
+                        model_create.tag_list.pop(index)
+
             for event_tag_create in model_create.get_event_tag_create_list():
                 error = await self._query.create(
                     model_create=event_tag_create, session=session

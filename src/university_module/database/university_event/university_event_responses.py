@@ -5,26 +5,32 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.base_response_handler import BaseResponseHandler
 from src.schemas import Response
-from src.tour_module.database.tour_event.text.tour_event_data_key import (
-    TourEventDataKey,
+from src.university_module.database.university_event.text.university_event_data_key import (
+    UniversityEventDataKey,
 )
-from src.tour_module.database.tour_event.text.tour_event_details import TourEventDetails
-from src.tour_module.database.tour_event.text.tour_event_message import TourEventMessage
-from src.tour_module.database.tour_event.tour_event_models import (
-    TourEventFilter,
-    TourEventModels,
+from src.university_module.database.university_event.text.university_event_details import (
+    UniversityEventDetails,
 )
-from src.tour_module.database.tour_event.tour_event_query import TourEventQuery
+from src.university_module.database.university_event.text.university_event_messages import (
+    UniversityEventMessage,
+)
+from src.university_module.database.university_event.university_event_models import (
+    UniversityEventFilter,
+    UniversityEventModels,
+)
+from src.university_module.database.university_event.university_event_query import (
+    UniversityEventQuery,
+)
 from src.utils import Status, return_json
 
 
-class TourEventResponseHandler(BaseResponseHandler):
-    _query: TourEventQuery = TourEventQuery()
-    _message: TourEventMessage = TourEventMessage()
-    _data_key: TourEventDataKey = TourEventDataKey()
-    _details: TourEventDetails = TourEventDetails()
+class UniversityEventResponseHandler(BaseResponseHandler):
+    _query: UniversityEventQuery = UniversityEventQuery()
+    _message: UniversityEventMessage = UniversityEventMessage()
+    _data_key: UniversityEventDataKey = UniversityEventDataKey()
+    _details: UniversityEventDetails = UniversityEventDetails()
 
-    _models: TourEventModels = TourEventModels()
+    _models: UniversityEventModels = UniversityEventModels()
     _schema_create_class: type = _models.create_class
 
     _schema_delete_list_class: type = _models.delete_list_class
@@ -36,30 +42,36 @@ class TourEventResponseHandler(BaseResponseHandler):
     _schema_read_event_list_class: type = _models.read_event_list_class
 
     _readable_schema_filter: dict[Enum, type] = {
-        TourEventFilter.TOUR: _schema_read_event_list_class,
+        UniversityEventFilter.UNIVERSITY: _schema_read_event_list_class,
     }
 
     async def create_list(
         self, model_create: _schema_create_list_class, session: AsyncSession
     ) -> Response:
         try:
-            tour_event_filter = TourEventFilter.TOUR
+            university_event_filter = UniversityEventFilter.UNIVERSITY
 
             schemas = await self._query.get_by_dependency(
-                dependency_field=self._query.dependency_fields[tour_event_filter],
-                value=model_create.tour_id,
+                dependency_field=self._query.dependency_fields[university_event_filter],
+                value=model_create.university_id,
                 session=session,
             )
             if schemas is not None:
-                readable_schemas = self._readable_schema_filter[tour_event_filter]()
-                readable_schemas.set_by_tour_event_read(tour_event_read_list=schemas)
+                readable_schemas = self._readable_schema_filter[
+                    university_event_filter
+                ]()
+                readable_schemas.set_by_university_event_read(
+                    university_event_read_list=schemas
+                )
                 for index in range(model_create.event_list):
                     if model_create.event_list[index] in readable_schemas.event_id_list:
                         model_create.event_list.pop(index)
 
-            for tour_event_create in model_create.get_tour_event_create_list():
+            for (
+                university_event_create
+            ) in model_create.get_university_event_create_list():
                 error = await self._query.create(
-                    model_create=tour_event_create, session=session
+                    model_create=university_event_create, session=session
                 )
                 if error is not None:
                     raise error
@@ -78,18 +90,22 @@ class TourEventResponseHandler(BaseResponseHandler):
         self,
         value: int,
         session: AsyncSession,
-        tour_event_filter: TourEventFilter = TourEventFilter.TOUR,
+        university_event_filter: UniversityEventFilter = UniversityEventFilter.UNIVERSITY,
     ) -> Response:
         try:
             schemas = await self._query.get_by_dependency(
-                dependency_field=self._query.dependency_fields[tour_event_filter],
+                dependency_field=self._query.dependency_fields[university_event_filter],
                 value=value,
                 session=session,
             )
 
             if schemas is not None:
-                readable_schemas = self._readable_schema_filter[tour_event_filter]()
-                readable_schemas.set_by_tour_event_read(tour_event_read_list=schemas)
+                readable_schemas = self._readable_schema_filter[
+                    university_event_filter
+                ]()
+                readable_schemas.set_by_university_event_read(
+                    university_event_read_list=schemas
+                )
                 data = {
                     self._data_key.get("count"): len(schemas),
                     self._data_key.get("schemas"): readable_schemas,
@@ -122,7 +138,7 @@ class TourEventResponseHandler(BaseResponseHandler):
                     status=Status.SUCCESS,
                     message=self._message.get("delete_success").format(
                         id="("
-                        + str(model_delete.tour_id)
+                        + str(model_delete.university_id)
                         + " - "
                         + str(model_delete.event_list)
                         + ")"
@@ -136,7 +152,7 @@ class TourEventResponseHandler(BaseResponseHandler):
                 status=Status.ERROR,
                 message=self._message.get("delete_error").format(
                     id="("
-                    + str(model_delete.tour_id)
+                    + str(model_delete.university_id)
                     + " - "
                     + str(model_delete.event_list)
                     + ")"

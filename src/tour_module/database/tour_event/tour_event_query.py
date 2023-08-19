@@ -52,8 +52,8 @@ class TourEventQuery(DependentBaseQuery):
             for event_id in model_delete.event_list:
                 await session.execute(
                     delete(self._model).where(
-                        self._model.tour_id == model_delete.tour_id
-                        and self._model.event_id == event_id
+                        (self._model.tour_id == model_delete.tour_id)
+                        & (self._model.event_id == event_id)
                     )
                 )
             await session.commit()

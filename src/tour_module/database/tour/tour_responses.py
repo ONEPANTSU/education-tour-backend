@@ -12,6 +12,12 @@ from src.tour_module.database.tour.tour_models import TourModels
 from src.tour_module.database.tour.tour_query import TourQuery
 from src.tour_module.database.tour_event.tour_event_models import TourEventFilter
 from src.tour_module.database.tour_event.tour_event_query import TourEventQuery
+from src.university_module.database.university_tour.university_tour_models import (
+    UniversityTourFilter,
+)
+from src.university_module.database.university_tour.university_tour_query import (
+    UniversityTourQuery,
+)
 from src.utils import Status, return_json
 
 
@@ -22,7 +28,10 @@ class TourResponseHandler(CascadeBaseResponseHandler):
     _details: TourDetails = TourDetails()
 
     _dependencies: dict[BaseQuery, object] = {
-        TourEventQuery(): TourEventQuery.dependency_fields[TourEventFilter.TOUR]
+        TourEventQuery(): TourEventQuery.dependency_fields[TourEventFilter.TOUR],
+        UniversityTourQuery(): UniversityTourQuery.dependency_fields[
+            UniversityTourFilter.TOUR
+        ],
     }
 
     _models: TourModels = TourModels()

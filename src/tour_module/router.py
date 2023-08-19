@@ -13,6 +13,7 @@ from src.tour_module.schemas import (
     TourEventListDelete,
     TourUpdate,
 )
+from src.university_module.router import university_tour_response_handler
 
 tour_router = APIRouter(prefix="/tour", tags=["tour"])
 
@@ -70,4 +71,13 @@ async def delete_tour_event(
 ) -> Response:
     return await tour_event_response_handler.delete_by_delete_schema(
         model_delete=tour_event, session=session
+    )
+
+
+@tour_router.get("/university_filter/{university_id}", response_model=Response)
+async def get_tour_id_list_by_university_id(
+    university_id: int, session: AsyncSession = Depends(get_async_session)
+) -> Response:
+    return await university_tour_response_handler.get_by_filter(
+        value=university_id, session=session
     )

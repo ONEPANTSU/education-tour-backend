@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import TIMESTAMP, Column, ForeignKey, Integer, String, JSON
+from sqlalchemy import JSON, TIMESTAMP, Column, ForeignKey, Integer, String
 
 from src.database import Base, metadata
 from src.event_module.models import Event
