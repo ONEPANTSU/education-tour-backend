@@ -53,7 +53,7 @@ class TourEventResponseHandler(BaseResponseHandler):
             if schemas is not None:
                 readable_schemas = self._readable_schema_filter[tour_event_filter]()
                 readable_schemas.set_by_tour_event_read(tour_event_read_list=schemas)
-                for index in range(model_create.event_list):
+                for index in range(len(model_create.event_list)):
                     if model_create.event_list[index] in readable_schemas.event_id_list:
                         model_create.event_list.pop(index)
 

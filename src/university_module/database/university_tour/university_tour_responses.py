@@ -64,7 +64,7 @@ class UniversityTourResponseHandler(BaseResponseHandler):
                 readable_schemas.set_by_university_tour_read(
                     university_tour_read_list=schemas
                 )
-                for index in range(model_create.tour_list):
+                for index in range(len(model_create.tour_list)):
                     if model_create.tour_list[index] in readable_schemas.tour_id_list:
                         model_create.tour_list.pop(index)
 

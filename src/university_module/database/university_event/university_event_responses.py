@@ -63,7 +63,7 @@ class UniversityEventResponseHandler(BaseResponseHandler):
                 readable_schemas.set_by_university_event_read(
                     university_event_read_list=schemas
                 )
-                for index in range(model_create.event_list):
+                for index in range(len(model_create.event_list)):
                     if model_create.event_list[index] in readable_schemas.event_id_list:
                         model_create.event_list.pop(index)
 
