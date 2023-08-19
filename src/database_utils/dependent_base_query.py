@@ -1,4 +1,5 @@
-from sqlalchemy import delete
+from loguru import logger
+from sqlalchemy import delete, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,6 +27,19 @@ class DependentBaseQuery(BaseQuery):
             await session.commit()
         except IntegrityError as e:
             return e
+
+    async def get_by_dependency(
+        self, dependency_field, value: int, session: AsyncSession
+    ) -> list[_schema_read_class] | None:
+        try:
+            models = await session.execute(
+                select(self._model).filter(dependency_field == value)
+            )
+            schema_list = self._convert_models_to_schema_list(models=models.all())
+            return schema_list
+        except Exception as e:
+            logger.error(str(e))
+            return None
 
     def get_schema_create_class(self) -> type:
         return self._schema_create_class

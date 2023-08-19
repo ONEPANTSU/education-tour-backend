@@ -20,6 +20,8 @@ from src.university_module.database.university_event.university_event_models imp
 from src.university_module.database.university_event.university_event_query import (
     UniversityEventQuery,
 )
+from src.user_module.database.user_event.user_event_models import UserEventFilter
+from src.user_module.database.user_event.user_event_query import UserEventQuery
 from src.utils import Status, return_json
 
 
@@ -35,6 +37,7 @@ class EventResponseHandler(CascadeBaseResponseHandler):
         UniversityEventQuery(): UniversityEventQuery.dependency_fields[
             UniversityEventFilter.EVENT
         ],
+        UserEventQuery(): UserEventQuery.dependency_fields[UserEventFilter.EVENT],
     }
 
     _models: EventModels = EventModels()

@@ -18,6 +18,8 @@ from src.university_module.database.university_tour.university_tour_models impor
 from src.university_module.database.university_tour.university_tour_query import (
     UniversityTourQuery,
 )
+from src.user_module.database.user_tour.user_tour_models import UserTourFilter
+from src.user_module.database.user_tour.user_tour_query import UserTourQuery
 from src.utils import Status, return_json
 
 
@@ -32,6 +34,7 @@ class TourResponseHandler(CascadeBaseResponseHandler):
         UniversityTourQuery(): UniversityTourQuery.dependency_fields[
             UniversityTourFilter.TOUR
         ],
+        UserTourQuery(): UserTourQuery.dependency_fields[UserTourFilter.TOUR],
     }
 
     _models: TourModels = TourModels()
