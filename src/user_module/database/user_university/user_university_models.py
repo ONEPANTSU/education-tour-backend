@@ -4,9 +4,9 @@ from src.database_utils.base_models import BaseModels
 from src.user_module.models import UserUniversity
 from src.user_module.schemas import (
     UserUniversityCreate,
-    UserUniversityUpdate,
-    UserUniversityRead,
     UserUniversityDelete,
+    UserUniversityRead,
+    UserUniversityUpdate,
 )
 
 

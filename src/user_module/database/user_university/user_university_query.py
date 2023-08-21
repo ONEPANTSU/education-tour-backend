@@ -3,8 +3,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.dependent_base_query import DependentBaseQuery
-
-from src.user_module.database.user_university.user_university_models import UserUniversityModels, UserUniversityFilter
+from src.user_module.database.user_university.user_university_models import (
+    UserUniversityFilter,
+    UserUniversityModels,
+)
 
 
 class UserUniversityQuery(DependentBaseQuery):

@@ -13,7 +13,9 @@ from src.tour_module.schemas import (
     TourEventListDelete,
     TourUpdate,
 )
+from src.tour_module.utils import check_university_tour
 from src.university_module.router import university_tour_response_handler
+from src.utils import Role, access_denied, role_access
 
 tour_router = APIRouter(prefix="/tour", tags=["tour"])
 
@@ -37,41 +39,96 @@ async def get_tour_by_id(
 
 @tour_router.post("/", response_model=Response)
 async def create_tour(
-    tour: TourCreate, session: AsyncSession = Depends(get_async_session)
+    user_role: Role,
+    tour: TourCreate,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tour_response_handler.create(model_create=tour, session=session)
+    if role_access[user_role] >= role_access[Role.UNIVERSITY]:
+        return await tour_response_handler.create(model_create=tour, session=session)
+
+    return access_denied()
 
 
 @tour_router.put("/{tour_id}", response_model=Response)
 async def update_tour(
-    tour: TourUpdate, session: AsyncSession = Depends(get_async_session)
+    user_role: Role,
+    user_id: int | None,
+    tour: TourUpdate,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tour_response_handler.update(model_update=tour, session=session)
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_response_handler.update(model_update=tour, session=session)
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour.id, session=session
+        ):
+            return await tour_response_handler.update(
+                model_update=tour, session=session
+            )
+
+    return access_denied()
 
 
 @tour_router.delete("/{tour_id}", response_model=Response)
 async def delete_tour(
-    tour_id: int, session: AsyncSession = Depends(get_async_session)
+    user_role: Role,
+    user_id: int | None,
+    tour_id: int,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tour_response_handler.delete(model_id=tour_id, session=session)
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_response_handler.delete(model_id=tour_id, session=session)
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour_id, session=session
+        ):
+            return await tour_response_handler.delete(model_id=tour_id, session=session)
+
+    return access_denied()
 
 
 @tour_router.post("/{tour_id}/set_events", response_model=Response)
 async def set_events(
-    tour_event: TourEventListCreate, session: AsyncSession = Depends(get_async_session)
+    user_role: Role,
+    user_id: int | None,
+    tour_event: TourEventListCreate,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tour_event_response_handler.create_list(
-        model_create=tour_event, session=session
-    )
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_event_response_handler.create_list(
+            model_create=tour_event, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour_event.tour_id, session=session
+        ):
+            return await tour_event_response_handler.create_list(
+                model_create=tour_event, session=session
+            )
+
+    return access_denied()
 
 
 @tour_router.delete("/{tour_id}/tour_event", response_model=Response)
 async def delete_tour_event(
-    tour_event: TourEventListDelete, session: AsyncSession = Depends(get_async_session)
+    user_role: Role,
+    user_id: int | None,
+    tour_event: TourEventListDelete,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tour_event_response_handler.delete_by_delete_schema(
-        model_delete=tour_event, session=session
-    )
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_event_response_handler.delete_by_delete_schema(
+            model_delete=tour_event, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour_event.tour_id, session=session
+        ):
+            return await tour_event_response_handler.delete_by_delete_schema(
+                model_delete=tour_event, session=session
+            )
+
+    return access_denied()
 
 
 @tour_router.get("/university_filter/{university_id}", response_model=Response)

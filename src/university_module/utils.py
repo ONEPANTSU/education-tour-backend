@@ -1,12 +1,5 @@
-from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.university_module.database.university_event.text.university_event_data_key import (
-    UniversityEventDataKey,
-)
-from src.university_module.database.university_event.university_event_responses import (
-    UniversityEventResponseHandler,
-)
 from src.user_module.database.user_university.text.user_university_data_key import (
     UserUniversityDataKey,
 )
@@ -18,8 +11,10 @@ from src.user_module.database.user_university.user_university_responses import (
 )
 
 
-async def check_university_event(user_id: int, event_id: int, session: AsyncSession):
-    university_id = (
+async def check_user_university(
+    user_id: int, university_id: int, session: AsyncSession
+):
+    existing_university_id = (
         (
             await UserUniversityResponseHandler().get_by_filter(
                 user_university_filter=UserUniversityFilter.USER,
@@ -30,13 +25,6 @@ async def check_university_event(user_id: int, event_id: int, session: AsyncSess
         .data[UserUniversityDataKey().get(key="schema")]
         .university_id
     )
-    events = (
-        (
-            await UniversityEventResponseHandler().get_by_filter(
-                value=university_id, session=session
-            )
-        )
-        .data[UniversityEventDataKey().get(key="schemas")]
-        .event_id_list
+    return (
+        existing_university_id is not None and university_id == existing_university_id
     )
-    return event_id in events

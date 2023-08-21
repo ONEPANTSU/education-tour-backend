@@ -4,12 +4,21 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.base_response_handler import BaseResponseHandler
 from src.schemas import Response
-
-from src.user_module.database.user_university.text.user_university_data_key import UserUniversityDataKey
-from src.user_module.database.user_university.text.user_university_details import UserUniversityDetails
-from src.user_module.database.user_university.text.user_university_messages import UserUniversityMessage
-from src.user_module.database.user_university.user_university_models import UserUniversityModels
-from src.user_module.database.user_university.user_university_query import UserUniversityQuery
+from src.user_module.database.user_university.text.user_university_data_key import (
+    UserUniversityDataKey,
+)
+from src.user_module.database.user_university.text.user_university_details import (
+    UserUniversityDetails,
+)
+from src.user_module.database.user_university.text.user_university_messages import (
+    UserUniversityMessage,
+)
+from src.user_module.database.user_university.user_university_models import (
+    UserUniversityModels,
+)
+from src.user_module.database.user_university.user_university_query import (
+    UserUniversityQuery,
+)
 from src.utils import Status, return_json
 
 
