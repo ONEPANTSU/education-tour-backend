@@ -274,7 +274,7 @@ async def set_university(
     return access_denied()
 
 
-@user_router.post("/{user_id}/university", response_model=Response)
+@user_router.get("/{user_id}/university", response_model=Response)
 async def get_university_by_user_id(
     user_role: Role,
     user_id: int | None,
