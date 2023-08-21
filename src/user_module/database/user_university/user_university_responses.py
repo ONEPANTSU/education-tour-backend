@@ -40,8 +40,7 @@ class UserUniversityResponseHandler(BaseResponseHandler):
             )
             if schemas is not None:
                 data = {
-                    self._data_key.get("count"): len(schemas),
-                    self._data_key.get("schemas"): schemas,
+                    self._data_key.get("schema"): schemas,
                 }
                 return return_json(
                     status=Status.SUCCESS,

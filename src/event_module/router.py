@@ -96,7 +96,7 @@ async def update_event(
         return await event_response_handler.update(model_update=event, session=session)
     elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
         if await check_university_event(
-            university_id=user_id, event_id=event.id, session=session
+            user_id=user_id, event_id=event.id, session=session
         ):
             return await event_response_handler.update(
                 model_update=event, session=session
@@ -116,7 +116,7 @@ async def delete_event(
         return await event_response_handler.delete(model_id=event_id, session=session)
     elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
         if await check_university_event(
-            university_id=user_id, event_id=event_id, session=session
+            user_id=user_id, event_id=event_id, session=session
         ):
             return await event_response_handler.delete(
                 model_id=event_id, session=session
@@ -240,7 +240,7 @@ async def set_tags(
         )
     elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
         if await check_university_event(
-            university_id=user_id, event_id=event_tag.event_id, session=session
+            user_id=user_id, event_id=event_tag.event_id, session=session
         ):
             return await event_tag_response_handler.create_list(
                 model_create=event_tag, session=session
@@ -289,7 +289,7 @@ async def delete_event_tag(
         )
     elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
         if await check_university_event(
-            university_id=user_id, event_id=event_tags.event_id, session=session
+            user_id=user_id, event_id=event_tags.event_id, session=session
         ):
             return await event_tag_response_handler.delete_by_delete_schema(
                 model_delete=event_tags, session=session
