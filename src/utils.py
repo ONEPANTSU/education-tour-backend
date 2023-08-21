@@ -38,10 +38,10 @@ logger.add(
 
 
 class Role(Enum):
-    GUEST = "GUEST"
-    USER = "USER"
-    UNIVERSITY = "UNIVERSITY"
-    ADMIN = "ADMIN"
+    GUEST = "0"
+    USER = "1"
+    UNIVERSITY = "2"
+    ADMIN = "3"
 
 
 role_access = {
