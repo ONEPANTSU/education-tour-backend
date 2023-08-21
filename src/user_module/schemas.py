@@ -3,6 +3,26 @@ from pydantic import BaseModel
 from src.database_utils.base_models import BaseIDModel
 
 
+class UserUniversityCreate(BaseModel):
+    user_id: int
+    university_id: int
+
+
+class UserUniversityRead(BaseIDModel):
+    user_id: int
+    university_id: int
+
+
+class UserUniversityDelete(BaseModel):
+    user_id: int
+    university_id: int
+
+
+class UserUniversityUpdate(BaseIDModel):
+    user_id: int
+    university_id: int
+
+
 class UserEventCreate(BaseModel):
     user_id: int
     event_id: int
