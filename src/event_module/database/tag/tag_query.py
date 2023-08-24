@@ -22,7 +22,9 @@ class TagQuery(BaseQuery):
         )
         return schema
 
-    async def get_by_filter_query(self, event_id: int | None, session: AsyncSession):
+    async def get_by_filter_query(
+        self, event_id: int | None, session: AsyncSession
+    ) -> list[_schema_read_class] | None:
         try:
             statement = select(self._model)
             if event_id is not None:

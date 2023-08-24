@@ -108,7 +108,7 @@ async def delete_university(
     return access_denied()
 
 
-@university_router.post("/{university_id}/set_events", response_model=Response)
+@university_router.post("/{university_id}/event", response_model=Response)
 async def set_events(
     user_role: Role,
     user_id: int | None,
@@ -132,7 +132,7 @@ async def set_events(
     return access_denied()
 
 
-@university_router.delete("/{university_id}/university_event", response_model=Response)
+@university_router.delete("/{university_id}/event", response_model=Response)
 async def delete_university_event(
     user_role: Role,
     user_id: int | None,
@@ -156,7 +156,7 @@ async def delete_university_event(
     return access_denied()
 
 
-@university_router.post("/{university_id}/set_tours", response_model=Response)
+@university_router.post("/{university_id}/tour", response_model=Response)
 async def set_tours(
     user_role: Role,
     user_id: int | None,
@@ -180,7 +180,7 @@ async def set_tours(
     return access_denied()
 
 
-@university_router.delete("/{university_id}/university_tour", response_model=Response)
+@university_router.delete("/{university_id}/tour", response_model=Response)
 async def delete_university_tour(
     user_role: Role,
     user_id: int | None,

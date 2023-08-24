@@ -18,7 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ROUTERS = [
+ROUTERS_V1 = [
     event_router,
     category_router,
     tag_router,
@@ -27,5 +27,5 @@ ROUTERS = [
     user_router,
 ]
 
-for router in ROUTERS:
-    app.include_router(router)
+for router in ROUTERS_V1:
+    app.include_router(router, prefix="/api/v1")

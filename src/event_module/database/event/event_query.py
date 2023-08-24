@@ -29,24 +29,24 @@ class EventQuery(BaseQuery):
         tour_id: int | None,
         university_id: int | None,
         session: AsyncSession,
-    ) -> list[EventRead] | None:
+    ) -> list[_schema_read_class] | None:
         try:
-            statement = select(Event)
+            statement = select(self._model)
 
             if category_list is not None:
                 for category_id in category_list:
-                    statement = statement.filter(Event.category_id == category_id)
+                    statement = statement.filter(self._model.category_id == category_id)
             if tag_id is not None:
                 statement = statement.join(
-                    EventTag, EventTag.event_id == Event.id
+                    EventTag, EventTag.event_id == self._model.id
                 ).filter(EventTag.tag_id == tag_id)
             if tour_id is not None:
                 statement = statement.join(
-                    TourEvent, TourEvent.event_id == Event.id
+                    TourEvent, TourEvent.event_id == self._model.id
                 ).filter(TourEvent.tour_id == tour_id)
             if university_id is not None:
                 statement = statement.join(
-                    UniversityEvent, UniversityEvent.event_id == Event.id
+                    UniversityEvent, UniversityEvent.event_id == self._model.id
                 ).filter(UniversityEvent.university_id == university_id)
 
             event_rows = await session.execute(statement)

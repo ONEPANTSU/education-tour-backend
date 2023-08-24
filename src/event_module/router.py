@@ -27,6 +27,8 @@ from src.schemas import Response
 from src.tour_module.database.tour_event.tour_event_responses import (
     TourEventResponseHandler,
 )
+from src.user_module.database.user_event.user_event_models import UserEventFilter
+from src.user_module.router import user_event_response_handler
 from src.utils import Role, access_denied, role_access
 
 event_router = APIRouter(prefix="/event", tags=["event"])
@@ -264,6 +266,26 @@ async def delete_event_tag(
         ):
             return await event_tag_response_handler.delete_by_delete_schema(
                 model_delete=event_tags, session=session
+            )
+
+    return access_denied()
+
+
+@event_router.get("/{event_id}/user", response_model=Response)
+async def get_users_by_event(
+    user_role: Role,
+    user_id: int | None,
+    event_id: int,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await user_event_response_handler.get_by_filter(
+            user_event_filter=UserEventFilter.EVENT, value=event_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if check_university_event(user_id=user_id, event_id=event_id, session=session):
+            return await user_event_response_handler.get_by_filter(
+                user_event_filter=UserEventFilter.EVENT, value=event_id, session=session
             )
 
     return access_denied()

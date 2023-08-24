@@ -43,6 +43,36 @@ class TourResponseHandler(CascadeBaseResponseHandler):
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
 
+    async def get_by_filter(
+        self,
+        university_id: int | None,
+        session: AsyncSession,
+    ) -> Response:
+        try:
+            schemas = await self._query.get_by_filter_query(
+                university_id=university_id,
+                session=session,
+            )
+            if schemas is not None:
+                data = {
+                    self._data_key.get("count"): len(schemas),
+                    self._data_key.get("schemas"): schemas,
+                }
+                return return_json(
+                    status=Status.SUCCESS,
+                    message=self._message.get("get_all_success"),
+                    data=data,
+                )
+            else:
+                raise Exception()
+        except Exception as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("get_all_error"),
+                details=str(e),
+            )
+
     @logger.catch
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession
