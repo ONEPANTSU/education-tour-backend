@@ -9,7 +9,6 @@ from src.event_module.database.category.category_response_handler import (
 )
 from src.event_module.database.event.event_response_handler import EventResponseHandler
 from src.event_module.database.event_tag.event_tag_response_handler import (
-    EventTagFilter,
     EventTagResponseHandler,
 )
 from src.event_module.database.tag.tag_response_handler import TagResponseHandler
@@ -31,8 +30,8 @@ from src.tour_module.database.tour_event.tour_event_responses import (
 from src.utils import Role, access_denied, role_access
 
 event_router = APIRouter(prefix="/event", tags=["event"])
-category_router = APIRouter(prefix="/event/category", tags=["category"])
-tag_router = APIRouter(prefix="/event/tag", tags=["tag"])
+category_router = APIRouter(prefix="/category", tags=["category"])
+tag_router = APIRouter(prefix="/tag", tags=["tag"])
 
 event_response_handler = EventResponseHandler()
 category_response_handler = CategoryResponseHandler()
@@ -67,8 +66,8 @@ async def get_event_by_id(
 
 @event_router.post("/", response_model=Response)
 async def create_event(
-    user_role: Role,
     event: EventCreate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.UNIVERSITY]:
@@ -79,9 +78,9 @@ async def create_event(
 
 @event_router.put("/{event_id}", response_model=Response)
 async def update_event(
-    user_role: Role,
     user_id: int | None,
     event: EventUpdate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:
@@ -99,9 +98,9 @@ async def update_event(
 
 @event_router.delete("/{event_id}", response_model=Response)
 async def delete_event(
-    user_role: Role,
     user_id: int | None,
     event_id: int,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:
@@ -135,8 +134,8 @@ async def get_category_by_id(
 
 @category_router.post("/", response_model=Response)
 async def create_category(
-    user_role: Role,
     category: CategoryCreate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
@@ -149,8 +148,8 @@ async def create_category(
 
 @category_router.put("/{category_id}", response_model=Response)
 async def update_category(
-    user_role,
     category: CategoryUpdate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
@@ -163,8 +162,8 @@ async def update_category(
 
 @category_router.delete("/{category_id}", response_model=Response)
 async def delete_category(
-    user_role: Role,
     category_id: int,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
@@ -176,10 +175,11 @@ async def delete_category(
 
 
 @tag_router.get("/", response_model=Response)
-async def get_all_tags(
+async def get_tags(
+    event_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await tag_response_handler.get_all(session=session)
+    return await tag_response_handler.get_by_filter(event_id=event_id, session=session)
 
 
 @tag_router.get("/{tag_id}", response_model=Response)
@@ -191,7 +191,9 @@ async def get_tag_by_id(
 
 @tag_router.post("/", response_model=Response)
 async def create_tag(
-    user_role: Role, tag: TagCreate, session: AsyncSession = Depends(get_async_session)
+    tag: TagCreate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
         return await tag_response_handler.create(model_create=tag, session=session)
@@ -201,7 +203,9 @@ async def create_tag(
 
 @tag_router.put("/{tag_id}", response_model=Response)
 async def update_tag(
-    user_role: Role, tag: TagUpdate, session: AsyncSession = Depends(get_async_session)
+    tag: TagUpdate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
         return await tag_response_handler.update(model_update=tag, session=session)
@@ -211,7 +215,9 @@ async def update_tag(
 
 @tag_router.delete("/{tag_id}", response_model=Response)
 async def delete_tag(
-    user_role: Role, tag_id: int, session: AsyncSession = Depends(get_async_session)
+    tag_id: int,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] >= role_access[Role.ADMIN]:
         return await tag_response_handler.delete(model_id=tag_id, session=session)
@@ -219,11 +225,11 @@ async def delete_tag(
         return access_denied()
 
 
-@event_router.post("/{event_id}/tags", response_model=Response)
+@event_router.post("/{event_id}/tag", response_model=Response)
 async def set_tags(
-    user_role: Role,
-    user_id: int | None,
     event_tag: EventTagListCreate,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    user_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:
@@ -241,20 +247,11 @@ async def set_tags(
     return access_denied()
 
 
-@tag_router.get("/event_filter/{event_id}", response_model=Response)
-async def get_tag_id_list_by_event_id(
-    event_id: int, session: AsyncSession = Depends(get_async_session)
-) -> Response:
-    return await event_tag_response_handler.get_by_filter(
-        event_tag_filter=EventTagFilter.EVENT, value=event_id, session=session
-    )
-
-
-@event_router.delete("/{event_id}/event_tag", response_model=Response)
+@event_router.delete("/{event_id}/tag", response_model=Response)
 async def delete_event_tag(
-    user_role: Role,
-    user_id: int | None,
     event_tags: EventTagListDelete,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    user_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:

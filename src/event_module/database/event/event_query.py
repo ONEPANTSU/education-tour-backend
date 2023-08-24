@@ -31,24 +31,28 @@ class EventQuery(BaseQuery):
         session: AsyncSession,
     ) -> list[EventRead] | None:
         try:
-            events = []
-            for category_id in category_list:
-                event_rows = await session.execute(
-                    select(Event)
-                    .join(EventTag, EventTag.event_id == Event.id)
-                    .join(TourEvent, TourEvent.event_id == Event.id)
-                    .join(UniversityEvent, UniversityEvent.event_id == Event.id)
-                    .filter(
-                        Event.category_id
-                        == category_id & EventTag.tag_id
-                        == tag_id & TourEvent.tour_id
-                        == tour_id & UniversityEvent.university_id
-                        == university_id
-                    )
-                )
+            statement = select(Event)
 
-                events += self._convert_models_to_schema_list(models=event_rows.all())
-            return events
+            if category_list is not None:
+                for category_id in category_list:
+                    statement = statement.filter(Event.category_id == category_id)
+            if tag_id is not None:
+                statement = statement.join(
+                    EventTag, EventTag.event_id == Event.id
+                ).filter(EventTag.tag_id == tag_id)
+            if tour_id is not None:
+                statement = statement.join(
+                    TourEvent, TourEvent.event_id == Event.id
+                ).filter(TourEvent.tour_id == tour_id)
+            if university_id is not None:
+                statement = statement.join(
+                    UniversityEvent, UniversityEvent.event_id == Event.id
+                ).filter(UniversityEvent.university_id == university_id)
+
+            event_rows = await session.execute(statement)
+
+            return self._convert_models_to_schema_list(models=event_rows.all())
+
         except Exception as e:
             logger.error(str(e))
             return None

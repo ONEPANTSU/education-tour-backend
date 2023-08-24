@@ -55,7 +55,7 @@ class EventTagResponseHandler(BaseResponseHandler):
             if schemas is not None:
                 readable_schemas = self._readable_schema_filter[event_tag_filter]()
                 readable_schemas.set_by_event_tag_read(event_tag_read_list=schemas)
-                for index in range(model_create.tag_list):
+                for index in range(len(model_create.tag_list)):
                     if model_create.tag_list[index] in readable_schemas.tag_id_list:
                         model_create.tag_list.pop(index)
 

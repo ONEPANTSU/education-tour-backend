@@ -12,7 +12,6 @@ from src.university_module.database.university_event.university_event_responses 
 from src.university_module.database.university_tour.university_tour_responses import (
     UniversityTourResponseHandler,
 )
-
 from src.university_module.schemas import (
     UniversityCreate,
     UniversityEventListCreate,
