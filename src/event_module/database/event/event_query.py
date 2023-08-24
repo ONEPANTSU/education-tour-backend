@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.address_schema import Address
 from src.database_utils.base_query import BaseQuery
 from src.event_module.database.event.event_models import EventModels
-from src.event_module.models import Event
+from src.event_module.models import Event, EventTag
 from src.event_module.schemas import EventRead
+from src.tour_module.models import TourEvent
+from src.university_module.models import UniversityEvent
 
 
 class EventQuery(BaseQuery):
@@ -19,6 +21,37 @@ class EventQuery(BaseQuery):
     _schema_update_class: type = _models.update_class
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
+
+    async def get_by_filter_query(
+        self,
+        category_list: list[int] | None,
+        tag_id: int | None,
+        tour_id: int | None,
+        university_id: int | None,
+        session: AsyncSession,
+    ) -> list[EventRead] | None:
+        try:
+            events = []
+            for category_id in category_list:
+                event_rows = await session.execute(
+                    select(Event)
+                    .join(EventTag, EventTag.event_id == Event.id)
+                    .join(TourEvent, TourEvent.event_id == Event.id)
+                    .join(UniversityEvent, UniversityEvent.event_id == Event.id)
+                    .filter(
+                        Event.category_id
+                        == category_id & EventTag.tag_id
+                        == tag_id & TourEvent.tour_id
+                        == tour_id & UniversityEvent.university_id
+                        == university_id
+                    )
+                )
+
+                events += self._convert_models_to_schema_list(models=event_rows.all())
+            return events
+        except Exception as e:
+            logger.error(str(e))
+            return None
 
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession

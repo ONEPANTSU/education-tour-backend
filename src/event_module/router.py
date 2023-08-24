@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -26,7 +28,6 @@ from src.schemas import Response
 from src.tour_module.database.tour_event.tour_event_responses import (
     TourEventResponseHandler,
 )
-from src.university_module.router import university_event_response_handler
 from src.utils import Role, access_denied, role_access
 
 event_router = APIRouter(prefix="/event", tags=["event"])
@@ -41,28 +42,19 @@ tour_event_response_handler = TourEventResponseHandler()
 
 
 @event_router.get("/", response_model=Response)
-async def get_all_events(
+async def get_events(
+    category_list: Annotated[list[int] | None, Query()] = None,
+    tag_id: Annotated[int | None, Query()] = None,
+    tour_id: Annotated[int | None, Query()] = None,
+    university_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
-    return await event_response_handler.get_all(session=session)
-
-
-@event_router.get("/category_filter/", response_model=Response)
-async def get_events_by_categories(
-    category_list: list[int] = Query(),
-    session: AsyncSession = Depends(get_async_session),
-) -> Response:
-    return await event_response_handler.get_by_categories(
-        category_list=category_list, session=session
-    )
-
-
-@event_router.get("/category_filter/{category_id}", response_model=Response)
-async def get_events_by_category(
-    category_id: int, session: AsyncSession = Depends(get_async_session)
-) -> Response:
-    return await event_response_handler.get_by_category(
-        category_id=category_id, session=session
+    return await event_response_handler.get_by_filter(
+        category_list=category_list,
+        tag_id=tag_id,
+        tour_id=tour_id,
+        university_id=university_id,
+        session=session,
     )
 
 
@@ -249,30 +241,12 @@ async def set_tags(
     return access_denied()
 
 
-@event_router.get("/tour_filter/{tour_id}", response_model=Response)
-async def get_event_id_list_by_tour_id(
-    tour_id: int, session: AsyncSession = Depends(get_async_session)
-) -> Response:
-    return await tour_event_response_handler.get_by_filter(
-        value=tour_id, session=session
-    )
-
-
 @tag_router.get("/event_filter/{event_id}", response_model=Response)
 async def get_tag_id_list_by_event_id(
     event_id: int, session: AsyncSession = Depends(get_async_session)
 ) -> Response:
     return await event_tag_response_handler.get_by_filter(
         event_tag_filter=EventTagFilter.EVENT, value=event_id, session=session
-    )
-
-
-@event_router.get("/tag_filter/{tag_id}", response_model=Response)
-async def get_event_id_list_by_tag_id(
-    tag_id: int, session: AsyncSession = Depends(get_async_session)
-) -> Response:
-    return await event_tag_response_handler.get_by_filter(
-        event_tag_filter=EventTagFilter.TAG, value=tag_id, session=session
     )
 
 
@@ -296,12 +270,3 @@ async def delete_event_tag(
             )
 
     return access_denied()
-
-
-@event_router.get("/university_filter/{university_id}", response_model=Response)
-async def get_event_id_list_by_university_id(
-    university_id: int, session: AsyncSession = Depends(get_async_session)
-) -> Response:
-    return await university_event_response_handler.get_by_filter(
-        value=university_id, session=session
-    )

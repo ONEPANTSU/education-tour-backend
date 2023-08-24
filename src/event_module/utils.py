@@ -1,4 +1,3 @@
-from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.university_module.database.university_event.text.university_event_data_key import (

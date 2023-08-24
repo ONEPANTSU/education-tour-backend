@@ -46,6 +46,90 @@ class EventResponseHandler(CascadeBaseResponseHandler):
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
 
+    async def get_by_filter(
+        self,
+        category_list: list[int] | None,
+        tag_id: int | None,
+        tour_id: int | None,
+        university_id: int | None,
+        session: AsyncSession,
+    ) -> Response:
+        try:
+            schemas = await self._query.get_by_filter_query(
+                category_list=category_list,
+                tag_id=tag_id,
+                tour_id=tour_id,
+                university_id=university_id,
+                session=session,
+            )
+            if schemas is not None:
+                data = {
+                    self._data_key.get("count"): len(schemas),
+                    self._data_key.get("schemas"): schemas,
+                }
+                return return_json(
+                    status=Status.SUCCESS,
+                    message=self._message.get("get_all_success"),
+                    data=data,
+                )
+            else:
+                raise Exception()
+        except Exception as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("get_all_error"),
+                details=str(e),
+            )
+
+    async def get_all(self, session: AsyncSession) -> Response:
+        try:
+            schemas = await self._query.get_all(session=session)
+            if schemas is not None:
+                data = {
+                    self._data_key.get("count"): len(schemas),
+                    self._data_key.get("schemas"): schemas,
+                }
+                return return_json(
+                    status=Status.SUCCESS,
+                    message=self._message.get("get_all_success"),
+                    data=data,
+                )
+            else:
+                raise Exception()
+        except Exception as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("get_all_error"),
+                details=str(e),
+            )
+
+    async def get_by_id_list(
+        self, model_id_list: list[int], session: AsyncSession
+    ) -> Response:
+        try:
+            schemas = [
+                await self._query.get_by_id(model_id=model_id, session=session)
+                for model_id in model_id_list
+            ]
+            if len(schemas) is not None:
+                data = {self._data_key.get("schemas"): schemas}
+                return return_json(
+                    status=Status.SUCCESS,
+                    message=self._message.get("get_all_success"),
+                    data=data,
+                )
+            else:
+                raise Exception()
+        except Exception as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("get_all_error"),
+                details=str(e),
+            )
+
     @logger.catch
     async def create(
         self, model_create: _schema_create_class, session: AsyncSession
