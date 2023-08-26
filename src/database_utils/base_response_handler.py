@@ -157,17 +157,20 @@ class BaseResponseHandler(ABC):
         self, image: UploadFile, model_id: int, session: AsyncSession
     ) -> Response:
         try:
+            check_model_result = await self.get_by_id(model_id=model_id, session=session)
+            if check_model_result.status != Status.SUCCESS.value:
+                return check_model_result
+
             image_id = await self._query.get_image_id(
                 model_id=model_id, session=session
             )
 
-            if image_id is not None or image_id != "":
-
+            if image_id is not None and image_id != "":
                 result = image_handler.delete_image_by_id(
                     image_id=image_id, directory=self._google_directory
                 )
                 if result.status != Status.SUCCESS.value:
-                    logger.warning(str(result.dict()))
+                    logger.warning(str(result.dict()) + "\nimage_id:\t" + str(image_id))
 
             result = image_handler.upload_image(
                 image=image, directory=self._google_directory
@@ -199,6 +202,11 @@ class BaseResponseHandler(ABC):
     @logger.catch
     async def delete_image(self, model_id: int, session: AsyncSession) -> Response:
         try:
+
+            check_model_result = await self.get_by_id(model_id=model_id, session=session)
+            if check_model_result.status != Status.SUCCESS.value:
+                return check_model_result
+
             image_id = await self._query.get_image_id(
                 model_id=model_id, session=session
             )
@@ -206,21 +214,21 @@ class BaseResponseHandler(ABC):
                 result = image_handler.delete_image_by_id(
                     image_id=image_id, directory=self._google_directory
                 )
-                if result.status == Status.SUCCESS.value:
-                    error = await self._query.update_image(
-                        image="", model_id=model_id, session=session
+                if result.status != Status.SUCCESS.value:
+                    logger.warning(str(result.dict()) + "\nimage_id:\t" + str(image_id))
+
+                error = await self._query.update_image(
+                    image="", model_id=model_id, session=session
+                )
+                if error is None:
+                    return return_json(
+                        status=Status.SUCCESS,
+                        message=self._message.get("image_success").format(
+                            id=model_id
+                        ),
                     )
-                    if error is None:
-                        return return_json(
-                            status=Status.SUCCESS,
-                            message=self._message.get("image_success").format(
-                                id=model_id
-                            ),
-                        )
-                    else:
-                        raise error
                 else:
-                    return result
+                    raise error
             else:
                 return return_json(
                     status=Status.ERROR,

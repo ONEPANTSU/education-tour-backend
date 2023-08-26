@@ -161,3 +161,8 @@ cython_debug/
 
 .env-deploy
 /client_secrets.json
+/service_account_file.json
+
+credentials.json
+
+settings.yaml

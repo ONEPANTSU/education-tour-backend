@@ -136,12 +136,12 @@ class BaseQuery(AbstractBaseQuery):
                 await session.execute(
                     select(self._model.image).where(self._model.id == model_id)
                 )
-            ).one()[0]
-            if url is None or url == "":
+            ).all()
+            if len(url) == 0 or url[0][0] == "" or url[0][0] is None:
                 return ""
             else:
-                start_index = url.find("/d/") + 3
-                end_index = url.find("/view")
+                start_index = url[0].find("/d/") + 3
+                end_index = url[0].find("/view")
 
                 image_id = url[start_index:end_index]
 
