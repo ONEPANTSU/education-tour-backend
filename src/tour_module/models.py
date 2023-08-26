@@ -17,6 +17,7 @@ class Tour(Base):
     date_end = Column(TIMESTAMP, default=datetime.utcnow)
     reg_deadline = Column(TIMESTAMP, default=datetime.utcnow)
     max_users = Column(Integer, nullable=True)
+    image = Column(String, nullable=True)
 
 
 class TourEvent(Base):

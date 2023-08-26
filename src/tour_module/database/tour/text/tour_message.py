@@ -15,6 +15,9 @@ update_success = "Успешное изменение тура #{id}"
 delete_error = "Произошла ошибка при удалении тура #{id}"
 delete_success = "Успешное удаление тура #{id}"
 
+image_error = "Произошла ошибка при изменении изображения для тура #{id}"
+image_success = "Успешное изменение изображения для тура #{id}"
+
 TOUR_MESSAGE = {
     "get_all_error": get_all_error,
     "get_all_success": get_all_success,
@@ -26,6 +29,8 @@ TOUR_MESSAGE = {
     "update_success": update_success,
     "delete_error": delete_error,
     "delete_success": delete_success,
+    "image_error": image_error,
+    "image_success": image_success,
 }
 
 

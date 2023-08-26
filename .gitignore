@@ -160,3 +160,4 @@ cython_debug/
 .idea/
 
 .env-deploy
+/client_secrets.json

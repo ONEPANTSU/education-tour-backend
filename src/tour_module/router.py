@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -93,6 +93,51 @@ async def delete_tour(
     return access_denied()
 
 
+@tour_router.post("/image", response_model=Response)
+async def update_image(
+    image: UploadFile,
+    tour_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_response_handler.update_image(
+            image=image, model_id=tour_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour_id, session=session
+        ):
+            return await tour_response_handler.update_image(
+                image=image, model_id=tour_id, session=session
+            )
+    else:
+        return access_denied()
+
+
+@tour_router.delete("/image", response_model=Response)
+async def delete_image(
+    tour_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await tour_response_handler.delete_image(
+            model_id=tour_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_tour(
+            user_id=user_id, tour_id=tour_id, session=session
+        ):
+            return await tour_response_handler.delete_image(
+                model_id=tour_id, session=session
+            )
+    else:
+        return access_denied()
+
+
 @tour_router.post("/{tour_id}/event", response_model=Response)
 async def set_events(
     tour_event: TourEventListCreate,
@@ -140,8 +185,8 @@ async def delete_tour_event(
 @tour_router.get("/{tour_id}/user", response_model=Response)
 async def get_users_by_tour(
     user_role: Role,
-    user_id: int | None,
     tour_id: int,
+    user_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:

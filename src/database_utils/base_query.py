@@ -114,3 +114,37 @@ class BaseQuery(AbstractBaseQuery):
             await session.commit()
         except IntegrityError as e:
             return e
+
+    async def update_image(
+        self, image: str, model_id: int, session: AsyncSession
+    ) -> IntegrityError | None:
+        try:
+            await session.execute(
+                update(self._model)
+                .values(image=image)
+                .where(self._model.id == model_id)
+            )
+            await session.commit()
+        except IntegrityError as e:
+            return e
+
+    async def get_image_id(
+        self, model_id: int, session: AsyncSession
+    ) -> IntegrityError | str:
+        try:
+            url = (
+                await session.execute(
+                    select(self._model.image).where(self._model.id == model_id)
+                )
+            ).one()[0]
+            if url is None or url == "":
+                return ""
+            else:
+                start_index = url.find("/d/") + 3
+                end_index = url.find("/view")
+
+                image_id = url[start_index:end_index]
+
+                return image_id
+        except IntegrityError as e:
+            return e

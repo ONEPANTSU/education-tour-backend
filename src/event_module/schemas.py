@@ -16,6 +16,7 @@ class EventCreate(BaseModel):
     max_users: int
     category_id: int = 1
     address: Address
+    image: str | None = None
 
     @logger.catch
     def fix_time(self) -> None:
@@ -33,6 +34,7 @@ class EventRead(BaseIDModel):
     max_users: int
     category_id: int
     address: Address
+    image: str | None
 
 
 class EventUpdate(BaseIDModel):
@@ -44,6 +46,7 @@ class EventUpdate(BaseIDModel):
     max_users: int
     category_id: int = 1
     address: Address
+    image: str | None
 
     @logger.catch
     def fix_time(self) -> None:

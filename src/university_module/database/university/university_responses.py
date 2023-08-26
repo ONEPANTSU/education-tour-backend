@@ -1,5 +1,6 @@
 from src.database_utils.base_query import BaseQuery
 from src.database_utils.cascade_base_response_handler import CascadeBaseResponseHandler
+from src.google_drive.directories import Directory
 from src.university_module.database.university.text.university_data_key import (
     UniversityDataKey,
 )
@@ -45,3 +46,5 @@ class UniversityResponseHandler(CascadeBaseResponseHandler):
     _schema_update_class: type = _models.update_class
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
+
+    _google_directory: Directory = Directory.UNIVERSITY

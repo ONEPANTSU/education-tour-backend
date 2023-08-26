@@ -41,6 +41,7 @@ class UniversityQuery(BaseQuery):
             address=address,
             description=model[0].description,
             reg_date=model[0].reg_date,
+            image=model[0].image,
         )
         return schema
 

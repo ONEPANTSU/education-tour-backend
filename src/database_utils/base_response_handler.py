@@ -1,5 +1,6 @@
 from abc import ABC
 
+from fastapi import UploadFile
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,8 @@ from src.database_utils.base_query import BaseQuery
 from src.database_utils.text.base_data_key import BaseDataKey
 from src.database_utils.text.base_details import BaseDetails
 from src.database_utils.text.base_message import BaseMessage
+from src.google_drive.directories import Directory
+from src.instruments import image_handler
 from src.schemas import Response
 from src.utils import Status, return_json
 
@@ -24,6 +27,7 @@ class BaseResponseHandler(ABC):
     _schema_update_class: type = _models.update_class
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
+    _google_directory: Directory = Directory.ROOT
 
     async def get_all(self, session: AsyncSession) -> Response:
         try:
@@ -146,4 +150,85 @@ class BaseResponseHandler(ABC):
             return return_json(
                 status=Status.ERROR,
                 message=self._message.get("delete_error").format(id=model_id),
+            )
+
+    @logger.catch
+    async def update_image(
+        self, image: UploadFile, model_id: int, session: AsyncSession
+    ) -> Response:
+        try:
+            image_id = await self._query.get_image_id(
+                model_id=model_id, session=session
+            )
+
+            if image_id is not None or image_id != "":
+
+                result = image_handler.delete_image_by_id(
+                    image_id=image_id, directory=self._google_directory
+                )
+                if result.status != Status.SUCCESS.value:
+                    logger.warning(str(result.dict()))
+
+            result = image_handler.upload_image(
+                image=image, directory=self._google_directory
+            )
+
+            if result.status != Status.SUCCESS.value:
+                return result
+
+            file_link = result.data["file_link"]
+            error = await self._query.update_image(
+                image=file_link, model_id=model_id, session=session
+            )
+
+            if error is not None:
+                raise error
+
+            return return_json(
+                status=Status.SUCCESS,
+                message=self._message.get("image_success").format(id=model_id),
+            )
+
+        except IntegrityError as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("image_error").format(id=model_id),
+            )
+
+    @logger.catch
+    async def delete_image(self, model_id: int, session: AsyncSession) -> Response:
+        try:
+            image_id = await self._query.get_image_id(
+                model_id=model_id, session=session
+            )
+            if image_id is not None and image_id != "":
+                result = image_handler.delete_image_by_id(
+                    image_id=image_id, directory=self._google_directory
+                )
+                if result.status == Status.SUCCESS.value:
+                    error = await self._query.update_image(
+                        image="", model_id=model_id, session=session
+                    )
+                    if error is None:
+                        return return_json(
+                            status=Status.SUCCESS,
+                            message=self._message.get("image_success").format(
+                                id=model_id
+                            ),
+                        )
+                    else:
+                        raise error
+                else:
+                    return result
+            else:
+                return return_json(
+                    status=Status.ERROR,
+                    message=self._message.get("image_error").format(id=model_id),
+                )
+        except IntegrityError as e:
+            logger.error(str(e))
+            return return_json(
+                status=Status.ERROR,
+                message=self._message.get("image_error").format(id=model_id),
             )

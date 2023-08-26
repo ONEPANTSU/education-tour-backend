@@ -15,6 +15,7 @@ class UniversityCreate(BaseModel):
     address: Address
     description: str
     reg_date: datetime
+    image: str | None = None
 
     @logger.catch
     def fix_time(self) -> None:
@@ -29,6 +30,7 @@ class UniversityRead(BaseIDModel):
     address: Address
     description: str
     reg_date: datetime
+    image: str | None
 
 
 class UniversityUpdate(BaseIDModel):
@@ -39,6 +41,7 @@ class UniversityUpdate(BaseIDModel):
     address: Address
     description: str
     reg_date: datetime
+    image: str | None
 
     @logger.catch
     def fix_time(self) -> None:

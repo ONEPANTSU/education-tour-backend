@@ -15,6 +15,7 @@ class TourCreate(BaseModel):
     date_end: datetime
     reg_deadline: datetime
     max_users: int
+    image: str | None = None
 
     @logger.catch
     def fix_time(self) -> None:
@@ -31,6 +32,7 @@ class TourRead(BaseIDModel):
     date_end: datetime
     reg_deadline: datetime
     max_users: int
+    image: str | None
 
 
 class TourUpdate(BaseIDModel):
@@ -41,6 +43,7 @@ class TourUpdate(BaseIDModel):
     date_end: datetime
     reg_deadline: datetime
     max_users: int
+    image: str | None
 
     @logger.catch
     def fix_time(self) -> None:

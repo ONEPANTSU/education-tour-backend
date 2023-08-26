@@ -1,3 +1,4 @@
+from fastapi import UploadFile
 from loguru import logger
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,6 +12,8 @@ from src.event_module.database.event.text.event_details import EventDetails
 from src.event_module.database.event.text.event_message import EventMessage
 from src.event_module.database.event_tag.event_tag_models import EventTagFilter
 from src.event_module.database.event_tag.event_tag_query import EventTagQuery
+from src.google_drive.directories import Directory
+from src.instruments import image_handler
 from src.schemas import Response
 from src.tour_module.database.tour_event.tour_event_models import TourEventFilter
 from src.tour_module.database.tour_event.tour_event_query import TourEventQuery
@@ -45,6 +48,8 @@ class EventResponseHandler(CascadeBaseResponseHandler):
     _schema_update_class: type = _models.update_class
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
+
+    _google_directory: Directory = Directory.EVENT
 
     async def get_by_filter(
         self,

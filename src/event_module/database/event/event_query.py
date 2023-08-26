@@ -62,6 +62,7 @@ class EventQuery(BaseQuery):
     ) -> IntegrityError | None:
         try:
             model_create.fix_time()
+
             await session.execute(insert(self._model).values(**model_create.dict()))
             await session.commit()
         except IntegrityError as e:
@@ -82,6 +83,7 @@ class EventQuery(BaseQuery):
             max_users=model[0].max_users,
             category_id=model[0].category_id,
             address=address,
+            image=model[0].image,
         )
         return schema
 

@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
@@ -106,6 +108,51 @@ async def delete_university(
             )
 
     return access_denied()
+
+
+@university_router.post("/image", response_model=Response)
+async def update_image(
+    image: UploadFile,
+    university_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await university_response_handler.update_image(
+            image=image, model_id=university_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_user_university(
+            user_id=user_id, university_id=university_id, session=session
+        ):
+            return await university_response_handler.update_image(
+                image=image, model_id=university_id, session=session
+            )
+    else:
+        return access_denied()
+
+
+@university_router.delete("/image", response_model=Response)
+async def delete_image(
+    university_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await university_response_handler.delete_image(
+            model_id=university_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_user_university(
+            user_id=user_id, university_id=university_id, session=session
+        ):
+            return await university_response_handler.delete_image(
+                model_id=university_id, session=session
+            )
+    else:
+        return access_denied()
 
 
 @university_router.post("/{university_id}/event", response_model=Response)

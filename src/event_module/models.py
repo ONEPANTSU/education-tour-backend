@@ -24,6 +24,7 @@ class Event(Base):
     max_users = Column(Integer, nullable=True)
     category_id = Column(Integer, ForeignKey(Category.id), nullable=False)
     address = Column(JSON, nullable=True)
+    image = Column(String, nullable=True)
 
 
 class Tag(Base):

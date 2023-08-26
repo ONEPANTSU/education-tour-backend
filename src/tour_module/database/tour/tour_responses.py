@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database_utils.base_query import BaseQuery
 from src.database_utils.cascade_base_response_handler import CascadeBaseResponseHandler
+from src.google_drive.directories import Directory
 from src.schemas import Response
 from src.tour_module.database.tour.text.tour_data_key import TourDataKey
 from src.tour_module.database.tour.text.tour_details import TourDetails
@@ -42,6 +43,8 @@ class TourResponseHandler(CascadeBaseResponseHandler):
     _schema_update_class: type = _models.update_class
     _schema_read_class: type = _models.read_class
     _model: type = _models.database_table
+
+    _google_directory: Directory = Directory.TOUR
 
     async def get_by_filter(
         self,

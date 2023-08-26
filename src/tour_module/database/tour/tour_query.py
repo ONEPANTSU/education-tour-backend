@@ -64,6 +64,7 @@ class TourQuery(BaseQuery):
             reg_deadline=model[0].reg_deadline,
             max_users=model[0].max_users,
             address=address,
+            image=model[0].image,
         )
         return schema
 

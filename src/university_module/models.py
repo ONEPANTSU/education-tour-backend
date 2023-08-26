@@ -18,6 +18,7 @@ class University(Base):
     address = Column(JSON, nullable=True)
     description = Column(String, nullable=True)
     reg_date = Column(TIMESTAMP, default=datetime.utcnow)
+    image = Column(String, nullable=True)
 
 
 class UniversityEvent(Base):

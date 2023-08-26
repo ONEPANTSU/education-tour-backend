@@ -1,17 +1,17 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.event_module.database.category.category_response_handler import (
+from src.event_module.database.category.category_responses import (
     CategoryResponseHandler,
 )
-from src.event_module.database.event.event_response_handler import EventResponseHandler
-from src.event_module.database.event_tag.event_tag_response_handler import (
+from src.event_module.database.event.event_responses import EventResponseHandler
+from src.event_module.database.event_tag.event_tag_responses import (
     EventTagResponseHandler,
 )
-from src.event_module.database.tag.tag_response_handler import TagResponseHandler
+from src.event_module.database.tag.tag_responses import TagResponseHandler
 from src.event_module.schemas import (
     CategoryCreate,
     CategoryUpdate,
@@ -78,10 +78,55 @@ async def create_event(
         return access_denied()
 
 
+@event_router.post("/image", response_model=Response)
+async def update_image(
+    image: UploadFile,
+    event_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await event_response_handler.update_image(
+            image=image, model_id=event_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_event(
+            user_id=user_id, event_id=event_id, session=session
+        ):
+            return await event_response_handler.update_image(
+                image=image, model_id=event_id, session=session
+            )
+    else:
+        return access_denied()
+
+
+@event_router.delete("/image", response_model=Response)
+async def delete_image(
+    event_id: int,
+    user_id: Annotated[int | None, Query()] = None,
+    user_role: Annotated[Role, Query()] = Role.GUEST,
+    session: AsyncSession = Depends(get_async_session),
+) -> Response:
+    if role_access[user_role] == role_access[Role.ADMIN]:
+        return await event_response_handler.delete_image(
+            model_id=event_id, session=session
+        )
+    elif role_access[user_role] == role_access[Role.UNIVERSITY] and user_id is not None:
+        if await check_university_event(
+            user_id=user_id, event_id=event_id, session=session
+        ):
+            return await event_response_handler.delete_image(
+                model_id=event_id, session=session
+            )
+    else:
+        return access_denied()
+
+
 @event_router.put("/{event_id}", response_model=Response)
 async def update_event(
-    user_id: int | None,
     event: EventUpdate,
+    user_id: Annotated[int | None, Query()] = None,
     user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
@@ -100,8 +145,8 @@ async def update_event(
 
 @event_router.delete("/{event_id}", response_model=Response)
 async def delete_event(
-    user_id: int | None,
     event_id: int,
+    user_id: Annotated[int | None, Query()] = None,
     user_role: Annotated[Role, Query()] = Role.GUEST,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
@@ -274,8 +319,8 @@ async def delete_event_tag(
 @event_router.get("/{event_id}/user", response_model=Response)
 async def get_users_by_event(
     user_role: Role,
-    user_id: int | None,
     event_id: int,
+    user_id: Annotated[int | None, Query()] = None,
     session: AsyncSession = Depends(get_async_session),
 ) -> Response:
     if role_access[user_role] == role_access[Role.ADMIN]:

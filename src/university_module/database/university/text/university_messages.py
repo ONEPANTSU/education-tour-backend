@@ -15,6 +15,9 @@ update_success = "Успешное изменение университета #
 delete_error = "Произошла ошибка при удалении университета #{id}"
 delete_success = "Успешное удаление университета #{id}"
 
+image_error = "Произошла ошибка при изменении изображения для университета #{id}"
+image_success = "Успешное изменение изображения для университета #{id}"
+
 UNIVERSITY_MESSAGE = {
     "get_all_error": get_all_error,
     "get_all_success": get_all_success,
@@ -26,6 +29,8 @@ UNIVERSITY_MESSAGE = {
     "update_success": update_success,
     "delete_error": delete_error,
     "delete_success": delete_success,
+    "image_error": image_error,
+    "image_success": image_success,
 }
 
 
