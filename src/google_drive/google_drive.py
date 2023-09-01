@@ -30,7 +30,9 @@ class Driver:
             image.SetContentFile(filename=os.path.join(temp_directory, filename))
             image.Upload()
 
-            file_link = f"https://drive.google.com/file/d/{image['id']}/view"
+            # file_link = f"https://drive.google.com/file/d/{image['id']}/view"
+
+            file_link = f"https://drive.google.com/uc?export=view&id={image['id']}"
 
             return return_json(
                 status=Status.SUCCESS,
